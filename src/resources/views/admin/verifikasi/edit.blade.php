@@ -1,0 +1,405 @@
+@extends('layouts.admin')
+@section('title', 'Edit Verifikasi')
+@section('breadcrumb', 'Edit Verifikasi')
+
+@section('content')
+
+    <div class="page-hd d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="page-ttl">Edit Verifikasi Lapangan</h1>
+            <p class="page-stl">Memperbarui data verifikasi untuk pengaduan
+                <code>{{ $verifikasi->pengaduan?->nomor_pengaduan }}</code>
+            </p>
+        </div>
+        <a href="{{ route('admin.verifikasi.show', $verifikasi) }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show mb-3" style="font-size:.85rem">
+            <strong><i class="bi bi-exclamation-circle-fill me-1"></i> Periksa isian:</strong>
+            <ul class="mb-0 mt-1 ps-4">
+                @foreach ($errors->all() as $e)
+                    <li>{{ $e }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('admin.verifikasi.update', $verifikasi) }}" enctype="multipart/form-data">
+        @csrf @method('PATCH')
+
+        {{-- Tanggal & Tenggat --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="cp-title">Informasi Umum</div>
+            </div>
+            <div class="cp-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Tanggal Verifikasi <span class="text-danger">*</span></label>
+                        <input type="date" name="tanggal_verifikasi" class="form-control"
+                            value="{{ old('tanggal_verifikasi', $verifikasi->tanggal_verifikasi->format('Y-m-d')) }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tenggat Tindak Lanjut</label>
+                        <input type="date" name="tenggat_tindak_lanjut" class="form-control"
+                            value="{{ old('tenggat_tindak_lanjut', $verifikasi->tenggat_tindak_lanjut?->format('Y-m-d')) }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tim Verifikator --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="cp-title"><span class="badge me-2" style="background:var(--maroon)">A</span>Tim Verifikator
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-maroon" onclick="addTim()">
+                    <i class="bi bi-plus-circle me-1"></i> Tambah
+                </button>
+            </div>
+            <div class="cp-body">
+                <div class="row g-2 mb-1 d-none d-md-flex">
+                    <div class="col-md-3"><span
+                            style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase">Nama
+                            *</span></div>
+                    <div class="col-md-3"><span
+                            style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase">NIP</span>
+                    </div>
+                    <div class="col-md-2"><span
+                            style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase">Pangkat</span>
+                    </div>
+                    <div class="col-md-3"><span
+                            style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase">Jabatan</span>
+                    </div>
+                </div>
+                <div id="tim-container">
+                    @forelse($verifikasi->timVerifikator as $i => $t)
+                        <div class="tim-row mb-2" data-index="{{ $i }}">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-3">
+                                    <input type="text" name="tim[{{ $i }}][nama]"
+                                        class="form-control form-control-sm" value="{{ old("tim.$i.nama", $t->nama) }}"
+                                        placeholder="Nama lengkap">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <input type="text" name="tim[{{ $i }}][nip]"
+                                        class="form-control form-control-sm" value="{{ old("tim.$i.nip", $t->nip) }}"
+                                        placeholder="NIP">
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <input type="text" name="tim[{{ $i }}][pangkat]"
+                                        class="form-control form-control-sm"
+                                        value="{{ old("tim.$i.pangkat", $t->pangkat) }}" placeholder="III/a">
+                                </div>
+                                <div class="col-10 col-md-3">
+                                    <input type="text" name="tim[{{ $i }}][jabatan]"
+                                        class="form-control form-control-sm"
+                                        value="{{ old("tim.$i.jabatan", $t->jabatan) }}" placeholder="Jabatan">
+                                </div>
+                                <div class="col-2 col-md-1 text-end">
+                                    <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTim(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="tim-row mb-2" data-index="0">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-3">
+                                    <input type="text" name="tim[0][nama]" class="form-control form-control-sm"
+                                        placeholder="Nama lengkap">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <input type="text" name="tim[0][nip]" class="form-control form-control-sm"
+                                        placeholder="NIP">
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <input type="text" name="tim[0][pangkat]" class="form-control form-control-sm"
+                                        placeholder="III/a">
+                                </div>
+                                <div class="col-10 col-md-3">
+                                    <input type="text" name="tim[0][jabatan]" class="form-control form-control-sm"
+                                        placeholder="Jabatan">
+                                </div>
+                                <div class="col-2 col-md-1 text-end">
+                                    <button type="button" class="btn btn-xs btn-outline-danger"
+                                        onclick="removeTim(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
+                @if ($pegawai->isNotEmpty())
+                    <div class="mt-2 pt-2 border-top">
+                        <div style="font-size:.78rem;color:var(--muted);margin-bottom:4px">Isi cepat dari data pegawai:
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            @foreach ($pegawai as $pg)
+                                <button type="button" class="btn btn-xs btn-outline-secondary"
+                                    onclick="addTimFromPegawai('{{ $pg->name }}','{{ $pg->nip }}','','{{ $pg->jabatan }}')">
+                                    {{ $pg->name }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Penanggung Jawab --}}
+        @php $pj = $verifikasi->penanggungJawab; @endphp
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="cp-title"><span class="badge me-2" style="background:var(--maroon-md)">B</span>Penanggung
+                    Jawab Usaha</div>
+            </div>
+            <div class="cp-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nama PJ</label>
+                        <input type="text" name="pj_nama_pj" class="form-control"
+                            value="{{ old('pj_nama_pj', $pj?->nama_pj) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Jabatan PJ</label>
+                        <input type="text" name="pj_jabatan_pj" class="form-control"
+                            value="{{ old('pj_jabatan_pj', $pj?->jabatan_pj) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Perusahaan</label>
+                        <input type="text" name="pj_nama_perusahaan" class="form-control"
+                            value="{{ old('pj_nama_perusahaan', $pj?->nama_perusahaan) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Bidang Usaha</label>
+                        <input type="text" name="pj_bidang_usaha" class="form-control"
+                            value="{{ old('pj_bidang_usaha', $pj?->bidang_usaha) }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">KBLI</label>
+                        <input type="text" name="pj_kbli" class="form-control"
+                            value="{{ old('pj_kbli', $pj?->kbli) }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">NIB</label>
+                        <input type="text" name="pj_nib" class="form-control"
+                            value="{{ old('pj_nib', $pj?->nib) }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">No. Telepon</label>
+                        <input type="text" name="pj_no_telp" class="form-control"
+                            value="{{ old('pj_no_telp', $pj?->no_telp) }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="pj_email" class="form-control"
+                            value="{{ old('pj_email', $pj?->email) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Koordinat Lat</label>
+                        <input type="number" step="any" name="pj_koordinat_lat" class="form-control"
+                            value="{{ old('pj_koordinat_lat', $pj?->koordinat_lat) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Koordinat Lng</label>
+                        <input type="number" step="any" name="pj_koordinat_lng" class="form-control"
+                            value="{{ old('pj_koordinat_lng', $pj?->koordinat_lng) }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Alamat Perusahaan</label>
+                        <textarea name="pj_alamat" class="form-control" rows="2">{{ old('pj_alamat', $pj?->alamat_perusahaan) }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Temuan --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="cp-title"><span class="badge me-2" style="background:#10b981">C–E</span>Temuan Lapangan</div>
+            </div>
+            <div class="cp-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label"><span class="badge me-1" style="background:var(--maroon)">C</span>
+                            Informasi Administrasi</label>
+                        <textarea name="informasi_administrasi" class="form-control" rows="4">{{ old('informasi_administrasi', $verifikasi->informasi_administrasi) }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label"><span class="badge me-1" style="background:var(--maroon-md)">D</span>
+                            Fakta Temuan</label>
+                        <textarea name="fakta_temuan" class="form-control" rows="5">{{ old('fakta_temuan', $verifikasi->fakta_temuan) }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label"><span class="badge me-1" style="background:#10b981">E</span> Saran
+                            Tindak Lanjut</label>
+                        <textarea name="saran_tindak_lanjut" class="form-control" rows="4">{{ old('saran_tindak_lanjut', $verifikasi->saran_tindak_lanjut) }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Foto yang ada --}}
+        @if ($verifikasi->dokumentasiFoto->isNotEmpty())
+            <div class="card-panel mb-3">
+                <div class="cp-head">
+                    <div class="cp-title"><i class="bi bi-images me-1 text-muted"></i> Foto yang Sudah Diunggah</div>
+                </div>
+                <div class="cp-body">
+                    <div class="row g-2">
+                        @foreach ($verifikasi->dokumentasiFoto as $foto)
+                            <div class="col-6 col-md-3 col-lg-2">
+                                <div
+                                    style="position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--border)">
+                                    <img src="{{ Storage::url($foto->path_file) }}" alt=""
+                                        style="width:100%;aspect-ratio:1;object-fit:cover">
+                                    @if ($foto->keterangan)
+                                        <div style="padding:3px 5px;font-size:.65rem;background:#fff;color:var(--muted)">
+                                            {{ $foto->keterangan }}</div>
+                                    @endif
+                                    <form method="POST"
+                                        action="{{ route('admin.verifikasi.foto.delete', [$verifikasi, $foto]) }}"
+                                        style="position:absolute;top:4px;right:4px">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-xs btn-danger"
+                                            onclick="return confirm('Hapus foto ini?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Tambah Foto Baru --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="cp-title"><i class="bi bi-camera me-1 text-muted"></i> Tambah Foto Baru</div>
+            </div>
+            <div class="cp-body">
+                <div id="foto-list">
+                    <div class="foto-item mb-2 p-2 rounded" style="border:1px dashed var(--border)">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-5">
+                                <input type="file" name="foto[]" class="form-control form-control-sm"
+                                    accept="image/*" onchange="previewFoto(this)">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="foto_keterangan[]" class="form-control form-control-sm"
+                                    placeholder="Keterangan foto">
+                            </div>
+                            <div class="col-md-1 text-end">
+                                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeFoto(this)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            <div class="col-12">
+                                <img src="" class="foto-preview d-none"
+                                    style="max-height:80px;border-radius:4px;border:1px solid var(--border)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="addFoto()">
+                    <i class="bi bi-plus-circle me-1"></i> Tambah Foto Lagi
+                </button>
+            </div>
+        </div>
+
+        {{-- Submit --}}
+        <div class="d-flex justify-content-between">
+            <a href="{{ route('admin.verifikasi.show', $verifikasi) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i> Batal
+            </a>
+            <button type="submit" class="btn btn-maroon px-5">
+                <i class="bi bi-save me-1"></i> Simpan Perubahan
+            </button>
+        </div>
+
+    </form>
+@endsection
+
+@push('scripts')
+    <script>
+        let timIdx = {{ $verifikasi->timVerifikator->count() ?: 1 }};
+
+        function addTim() {
+            const i = timIdx++;
+            const row = document.createElement('div');
+            row.className = 'tim-row mb-2';
+            row.innerHTML = `
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-3">
+        <input type="text" name="tim[${i}][nama]" class="form-control form-control-sm" placeholder="Nama lengkap">
+      </div>
+      <div class="col-6 col-md-3">
+        <input type="text" name="tim[${i}][nip]" class="form-control form-control-sm" placeholder="NIP">
+      </div>
+      <div class="col-6 col-md-2">
+        <input type="text" name="tim[${i}][pangkat]" class="form-control form-control-sm" placeholder="III/a">
+      </div>
+      <div class="col-10 col-md-3">
+        <input type="text" name="tim[${i}][jabatan]" class="form-control form-control-sm" placeholder="Jabatan">
+      </div>
+      <div class="col-2 col-md-1 text-end">
+        <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTim(this)">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>`;
+            document.getElementById('tim-container').appendChild(row);
+        }
+
+        function addTimFromPegawai(nama, nip, pangkat, jabatan) {
+            addTim();
+            const rows = document.querySelectorAll('.tim-row');
+            const last = rows[rows.length - 1];
+            last.querySelector('[name*="[nama]"]').value = nama;
+            last.querySelector('[name*="[nip]"]').value = nip;
+            last.querySelector('[name*="[pangkat]"]').value = pangkat;
+            last.querySelector('[name*="[jabatan]"]').value = jabatan;
+        }
+
+        function removeTim(btn) {
+            const rows = document.querySelectorAll('.tim-row');
+            if (rows.length > 1) btn.closest('.tim-row').remove();
+        }
+
+        function addFoto() {
+            const tmpl = document.querySelector('.foto-item').cloneNode(true);
+            tmpl.querySelector('input[type=file]').value = '';
+            tmpl.querySelector('input[type=text]').value = '';
+            const p = tmpl.querySelector('.foto-preview');
+            p.src = '';
+            p.classList.add('d-none');
+            document.getElementById('foto-list').appendChild(tmpl);
+        }
+
+        function removeFoto(btn) {
+            const items = document.querySelectorAll('.foto-item');
+            if (items.length > 1) btn.closest('.foto-item').remove();
+        }
+
+        function previewFoto(input) {
+            const prev = input.closest('.foto-item').querySelector('.foto-preview');
+            if (input.files && input.files[0]) {
+                const r = new FileReader();
+                r.onload = e => {
+                    prev.src = e.target.result;
+                    prev.classList.remove('d-none');
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+@endpush

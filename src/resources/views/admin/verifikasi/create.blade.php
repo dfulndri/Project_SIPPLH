@@ -1,0 +1,441 @@
+@extends('layouts.admin')
+@section('title', 'Buat Verifikasi Lapangan')
+@section('breadcrumb', 'Buat Verifikasi')
+
+@section('content')
+
+    <div class="page-hd d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="page-ttl">Buat Verifikasi Lapangan</h1>
+            <p class="page-stl">Isi formulir berikut sesuai hasil verifikasi di lapangan.</p>
+        </div>
+        <a href="{{ route('admin.verifikasi.index') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show mb-3" style="font-size:.85rem">
+            <strong><i class="bi bi-exclamation-circle-fill me-1"></i> Periksa kembali isian:</strong>
+            <ul class="mb-0 mt-1 ps-4">
+                @foreach ($errors->all() as $e)
+                    <li>{{ $e }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('admin.verifikasi.store') }}" enctype="multipart/form-data">
+        @csrf
+
+        {{-- ══ BAGIAN 0: PENGADUAN TERKAIT ════════════════════════════ --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="d-flex align-items-center gap-2">
+                    <div
+                        style="width:28px;height:28px;background:var(--maroon);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">
+                        0</div>
+                    <div>
+                        <div class="cp-title">Pengaduan yang Diverifikasi</div>
+                        <div class="cp-sub">Pilih pengaduan yang menjadi dasar verifikasi lapangan ini</div>
+                    </div>
+                </div>
+            </div>
+            <div class="cp-body">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Pilih Pengaduan <span class="text-danger">*</span></label>
+                        @if ($pengaduan)
+                            {{-- Pre-selected dari halaman pengaduan --}}
+                            <div class="d-flex align-items-center gap-2 p-2 rounded"
+                                style="background:var(--mint-bg);border:1px solid var(--mint)">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                <div>
+                                    <code>{{ $pengaduan->nomor_pengaduan }}</code>
+                                    <span class="ms-1" style="font-size:.82rem">— {{ $pengaduan->terlapor?->nama }}</span>
+                                </div>
+                            </div>
+                            <input type="hidden" name="pengaduan_id" value="{{ $pengaduan->id }}">
+                        @else
+                            <select name="pengaduan_id" class="form-select @error('pengaduan_id') is-invalid @enderror">
+                                <option value="">-- Pilih Pengaduan --</option>
+                                @foreach ($pengaduanList as $p)
+                                    <option value="{{ $p->id }}"
+                                        {{ old('pengaduan_id') == $p->id ? 'selected' : '' }}>
+                                        {{ $p->nomor_pengaduan }} — {{ $p->terlapor?->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @if ($pengaduanList->isEmpty())
+                                <div class="form-text text-warning">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Tidak ada pengaduan yang siap diverifikasi. Pastikan ada pengaduan berstatus "Diproses".
+                                </div>
+                            @endif
+                            @error('pengaduan_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        @endif
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tanggal Verifikasi <span class="text-danger">*</span></label>
+                        <input type="date" name="tanggal_verifikasi"
+                            class="form-control @error('tanggal_verifikasi') is-invalid @enderror"
+                            value="{{ old('tanggal_verifikasi', now()->format('Y-m-d')) }}">
+                        @error('tanggal_verifikasi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tenggat Tindak Lanjut</label>
+                        <input type="date" name="tenggat_tindak_lanjut" class="form-control"
+                            value="{{ old('tenggat_tindak_lanjut', now()->addDays(14)->format('Y-m-d')) }}">
+                        <div class="form-text">Default: 14 hari sejak tanggal verifikasi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ══ BAGIAN A: TIM VERIFIKATOR ══════════════════════════════ --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="d-flex align-items-center gap-2">
+                    <div
+                        style="width:28px;height:28px;background:var(--maroon);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">
+                        A</div>
+                    <div>
+                        <div class="cp-title">Tim Verifikator (Identitas Pengawas LH)</div>
+                        <div class="cp-sub">Daftar pegawai yang melaksanakan verifikasi lapangan</div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-maroon" onclick="addTim()">
+                    <i class="bi bi-plus-circle me-1"></i> Tambah Anggota
+                </button>
+            </div>
+            <div class="cp-body">
+                {{-- Header kolom --}}
+                <div class="row g-2 mb-1 d-none d-md-flex">
+                    <div class="col-md-3"><span
+                            style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase">Nama
+                            Lengkap *</span></div>
+                    <div class="col-md-3"><span
+                            style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase">NIP</span>
+                    </div>
+                    <div class="col-md-2"><span
+                            style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase">Pangkat/Gol</span>
+                    </div>
+                    <div class="col-md-3"><span
+                            style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase">Jabatan</span>
+                    </div>
+                </div>
+                <div id="tim-container">
+                    {{-- Baris pertama --}}
+                    <div class="tim-row mb-2" data-index="0">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-12 col-md-3">
+                                <input type="text" name="tim[0][nama]" class="form-control form-control-sm"
+                                    placeholder="Nama lengkap" value="{{ old('tim.0.nama') }}">
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <input type="text" name="tim[0][nip]" class="form-control form-control-sm"
+                                    placeholder="NIP" value="{{ old('tim.0.nip') }}">
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <input type="text" name="tim[0][pangkat]" class="form-control form-control-sm"
+                                    placeholder="III/a" value="{{ old('tim.0.pangkat') }}">
+                            </div>
+                            <div class="col-10 col-md-3">
+                                <input type="text" name="tim[0][jabatan]" class="form-control form-control-sm"
+                                    placeholder="Pengawas LH Muda" value="{{ old('tim.0.jabatan') }}">
+                            </div>
+                            <div class="col-2 col-md-1 text-end">
+                                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTim(this)"
+                                    title="Hapus baris">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{-- Quick fill dari daftar pegawai --}}
+                @if ($pegawai->isNotEmpty())
+                    <div class="mt-2 pt-2 border-top">
+                        <div style="font-size:.78rem;color:var(--muted);margin-bottom:4px">
+                            <i class="bi bi-lightning me-1"></i> Isi cepat dari data pegawai:
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            @foreach ($pegawai as $pg)
+                                <button type="button" class="btn btn-xs btn-outline-secondary"
+                                    onclick="addTimFromPegawai('{{ $pg->name }}', '{{ $pg->nip }}', '', '{{ $pg->jabatan }}')">
+                                    {{ $pg->name }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- ══ BAGIAN B: PENANGGUNG JAWAB USAHA ═══════════════════════ --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="d-flex align-items-center gap-2">
+                    <div
+                        style="width:28px;height:28px;background:var(--maroon-md);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">
+                        B</div>
+                    <div>
+                        <div class="cp-title">Identitas Penanggung Jawab Usaha / Kegiatan</div>
+                        <div class="cp-sub">Pihak terlapor yang hadir saat verifikasi lapangan</div>
+                    </div>
+                </div>
+            </div>
+            <div class="cp-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Penanggung Jawab</label>
+                        <input type="text" name="pj_nama_pj" class="form-control" value="{{ old('pj_nama_pj') }}"
+                            placeholder="Nama lengkap PJ">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Jabatan</label>
+                        <input type="text" name="pj_jabatan_pj" class="form-control"
+                            value="{{ old('pj_jabatan_pj') }}" placeholder="Direktur / Manajer / dll">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Perusahaan / Kegiatan</label>
+                        <input type="text" name="pj_nama_perusahaan" class="form-control"
+                            value="{{ old('pj_nama_perusahaan', $pengaduan?->terlapor?->nama) }}"
+                            placeholder="Nama lengkap perusahaan">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Bidang Usaha / Kegiatan</label>
+                        <input type="text" name="pj_bidang_usaha" class="form-control"
+                            value="{{ old('pj_bidang_usaha', $pengaduan?->terlapor?->jenis_usaha) }}"
+                            placeholder="Jenis bidang usaha">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">KBLI</label>
+                        <input type="text" name="pj_kbli" class="form-control" value="{{ old('pj_kbli') }}"
+                            placeholder="Kode KBLI">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">NIB</label>
+                        <input type="text" name="pj_nib" class="form-control" value="{{ old('pj_nib') }}"
+                            placeholder="Nomor Induk Berusaha">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">No. Telepon</label>
+                        <input type="text" name="pj_no_telp" class="form-control" value="{{ old('pj_no_telp') }}"
+                            placeholder="08xxxxxxxxxx">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="pj_email" class="form-control" value="{{ old('pj_email') }}"
+                            placeholder="email@perusahaan.com">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Koordinat Latitude</label>
+                        <input type="number" step="any" name="pj_koordinat_lat" class="form-control"
+                            value="{{ old('pj_koordinat_lat') }}" placeholder="-6.xxxxxxx">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Koordinat Longitude</label>
+                        <input type="number" step="any" name="pj_koordinat_lng" class="form-control"
+                            value="{{ old('pj_koordinat_lng') }}" placeholder="106.xxxxxxx">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Alamat Perusahaan / Lokasi Usaha</label>
+                        <textarea name="pj_alamat" class="form-control" rows="2" placeholder="Alamat lengkap lokasi usaha / kegiatan">{{ old('pj_alamat', $pengaduan?->terlapor?->alamat) }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ══ BAGIAN C/D/E: TEMUAN LAPANGAN ══════════════════════════ --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="d-flex align-items-center gap-2">
+                    <div
+                        style="width:28px;height:28px;background:#10b981;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">
+                        C</div>
+                    <div>
+                        <div class="cp-title">Temuan & Kesimpulan Lapangan</div>
+                        <div class="cp-sub">Hasil verifikasi dan rekomendasi tindak lanjut</div>
+                    </div>
+                </div>
+            </div>
+            <div class="cp-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">
+                            <span class="badge me-1" style="background:var(--maroon)">C</span>
+                            Informasi Administrasi
+                        </label>
+                        <textarea name="informasi_administrasi" class="form-control" rows="5"
+                            placeholder="Jelaskan status perizinan, dokumen lingkungan, and informasi administrasi terkait usaha/kegiatan yang diverifikasi...">{{ old('informasi_administrasi') }}</textarea>
+                        <div class="form-text">Meliputi: status izin lingkungan, AMDAL/UKL-UPL, izin operasional, dll.
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">
+                            <span class="badge me-1" style="background:var(--maroon-md)">D</span>
+                            Fakta Temuan Lapangan
+                        </label>
+                        <textarea name="fakta_temuan" class="form-control" rows="6"
+                            placeholder="Uraikan secara rinci fakta-fakta yang ditemukan di lapangan selama verifikasi. Meliputi kondisi fisik, hasil pengukuran, observasi, dll...">{{ old('fakta_temuan') }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">
+                            <span class="badge me-1" style="background:#10b981">E</span>
+                            Saran dan Rekomendasi Tindak Lanjut
+                        </label>
+                        <textarea name="saran_tindak_lanjut" class="form-control" rows="5"
+                            placeholder="Tuliskan saran, rekomendasi, dan langkah tindak lanjut yang harus dilakukan oleh pihak terlapor dalam jangka waktu yang telah ditentukan...">{{ old('saran_tindak_lanjut') }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ══ BAGIAN FOTO: DOKUMENTASI ════════════════════════════════ --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="d-flex align-items-center gap-2">
+                    <div
+                        style="width:28px;height:28px;background:#3b82f6;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">
+                        <i class="bi bi-camera-fill" style="font-size:.7rem"></i>
+                    </div>
+                    <div>
+                        <div class="cp-title">Dokumentasi Foto</div>
+                        <div class="cp-sub">Upload foto dokumentasi kegiatan verifikasi lapangan</div>
+                    </div>
+                </div>
+            </div>
+            <div class="cp-body">
+                <div id="foto-list">
+                    <div class="foto-item mb-3 p-3 rounded" style="border:1px dashed var(--border)">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-6">
+                                <label class="form-label mb-1" style="font-size:.8rem">File Foto</label>
+                                <input type="file" name="foto[]" class="form-control form-control-sm"
+                                    accept="image/*" onchange="previewFoto(this)">
+                                <div class="form-text">JPG/PNG, maks. 5MB</div>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label mb-1" style="font-size:.8rem">Keterangan</label>
+                                <input type="text" name="foto_keterangan[]" class="form-control form-control-sm"
+                                    placeholder="Keterangan foto...">
+                            </div>
+                            <div class="col-md-1 text-end d-flex align-items-end">
+                                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeFoto(this)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            <div class="col-12">
+                                <img src="" alt="" class="foto-preview d-none"
+                                    style="max-height:120px;border-radius:4px;border:1px solid var(--border)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addFoto()">
+                    <i class="bi bi-plus-circle me-1"></i> Tambah Foto
+                </button>
+            </div>
+        </div>
+
+        {{-- Submit --}}
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{{ route('admin.verifikasi.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i> Batal
+            </a>
+            <div class="d-flex gap-2">
+                <button type="submit" name="action" value="draft" class="btn btn-outline-maroon">
+                    <i class="bi bi-save me-1"></i> Simpan Draft
+                </button>
+                <button type="submit" name="action" value="save" class="btn btn-maroon px-4">
+                    <i class="bi bi-check2-circle me-1"></i> Simpan Verifikasi
+                </button>
+            </div>
+        </div>
+
+    </form>
+@endsection
+
+@push('scripts')
+    <script>
+        let timIdx = 1;
+
+        function addTim() {
+            const i = timIdx++;
+            const row = document.createElement('div');
+            row.className = 'tim-row mb-2';
+            row.dataset.index = i;
+            row.innerHTML = `
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-3">
+        <input type="text" name="tim[${i}][nama]" class="form-control form-control-sm" placeholder="Nama lengkap">
+      </div>
+      <div class="col-6 col-md-3">
+        <input type="text" name="tim[${i}][nip]" class="form-control form-control-sm" placeholder="NIP">
+      </div>
+      <div class="col-6 col-md-2">
+        <input type="text" name="tim[${i}][pangkat]" class="form-control form-control-sm" placeholder="III/a">
+      </div>
+      <div class="col-10 col-md-3">
+        <input type="text" name="tim[${i}][jabatan]" class="form-control form-control-sm" placeholder="Jabatan">
+      </div>
+      <div class="col-2 col-md-1 text-end">
+        <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTim(this)">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>`;
+            document.getElementById('tim-container').appendChild(row);
+        }
+
+        function addTimFromPegawai(nama, nip, pangkat, jabatan) {
+            addTim();
+            const rows = document.querySelectorAll('.tim-row');
+            const last = rows[rows.length - 1];
+            last.querySelector('[name*="[nama]"]').value = nama;
+            last.querySelector('[name*="[nip]"]').value = nip;
+            last.querySelector('[name*="[pangkat]"]').value = pangkat;
+            last.querySelector('[name*="[jabatan]"]').value = jabatan;
+        }
+
+        function removeTim(btn) {
+            const rows = document.querySelectorAll('.tim-row');
+            if (rows.length > 1) {
+                btn.closest('.tim-row').remove();
+            }
+        }
+
+        function addFoto() {
+            const tmpl = document.querySelector('.foto-item').cloneNode(true);
+            tmpl.querySelector('input[type=file]').value = '';
+            tmpl.querySelector('input[type=text]').value = '';
+            const prev = tmpl.querySelector('.foto-preview');
+            prev.src = '';
+            prev.classList.add('d-none');
+            document.getElementById('foto-list').appendChild(tmpl);
+        }
+
+        function removeFoto(btn) {
+            const items = document.querySelectorAll('.foto-item');
+            if (items.length > 1) btn.closest('.foto-item').remove();
+        }
+
+        function previewFoto(input) {
+            const prev = input.closest('.foto-item').querySelector('.foto-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    prev.src = e.target.result;
+                    prev.classList.remove('d-none');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+@endpush
