@@ -173,7 +173,7 @@ return new class extends Migration {
             $table->text('alamat_perusahaan')->nullable();
             $table->string('bidang_usaha')->nullable();
             $table->string('deskripsi_kegiatan')->nullable();
-            $table->string('kbli', 30)->nullable();
+            $table->string('kbli', 255)->nullable();
             $table->string('nib', 30)->nullable();
             $table->string('status_permodalan', 50)->nullable();
             $table->decimal('koordinat_lat', 10, 8)->nullable();

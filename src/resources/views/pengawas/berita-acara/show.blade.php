@@ -8,7 +8,10 @@
     <h1 class="page-ttl">Berita Acara {{ $ba->nomor_ba }}</h1>
     <p class="page-stl">{{ $ba->verifikasi?->pengaduan?->nomor_pengaduan }}</p>
   </div>
-  <a href="{{ route('pengawas.berita-acara.index') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Kembali</a>
+  <div class="d-flex gap-2">
+    <a href="{{ route('pengawas.berita-acara.pdf', $ba) }}" class="btn btn-sm btn-success"><i class="bi bi-download me-1"></i>Download PDF</a>
+    <a href="{{ route('pengawas.berita-acara.index') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Kembali</a>
+  </div>
 </div>
 
 <div class="row g-3">

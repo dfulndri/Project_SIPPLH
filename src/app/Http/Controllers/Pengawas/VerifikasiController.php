@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Pengawas;
 
 use App\Http\Controllers\Controller;
@@ -87,8 +88,10 @@ class VerifikasiController extends Controller
                 if (!empty($t['nama'])) {
                     TimVerifikator::create([
                         'verifikasi_id' => $v->id,
-                        'nama' => $t['nama'], 'nip' => $t['nip'] ?? null,
-                        'pangkat' => $t['pangkat'] ?? null, 'jabatan' => $t['jabatan'] ?? null,
+                        'nama' => $t['nama'],
+                        'nip' => $t['nip'] ?? null,
+                        'pangkat' => $t['pangkat'] ?? null,
+                        'jabatan' => $t['jabatan'] ?? null,
                         'urutan' => $i + 1,
                     ]);
                 }
@@ -102,7 +105,7 @@ class VerifikasiController extends Controller
                     'nama_perusahaan'   => $request->pj_nama_perusahaan,
                     'alamat_perusahaan' => $request->pj_alamat,
                     'bidang_usaha'      => $request->pj_bidang_usaha,
-                    'deskripsi_kegiatan'=> $request->pj_deskripsi_kegiatan,
+                    'deskripsi_kegiatan' => $request->pj_deskripsi_kegiatan,
                     'kbli'              => $request->pj_kbli,
                     'nib'               => $request->pj_nib,
                     'status_permodalan' => $request->pj_status_permodalan,
@@ -117,7 +120,8 @@ class VerifikasiController extends Controller
                 if (!empty($s['nama'])) {
                     Saksi::create([
                         'verifikasi_id' => $v->id,
-                        'nama' => $s['nama'], 'jabatan' => $s['jabatan'] ?? null,
+                        'nama' => $s['nama'],
+                        'jabatan' => $s['jabatan'] ?? null,
                         'urutan' => $i + 1,
                     ]);
                 }
@@ -171,8 +175,10 @@ class VerifikasiController extends Controller
                 if (!empty($t['nama'])) {
                     TimVerifikator::create([
                         'verifikasi_id' => $verifikasi->id,
-                        'nama' => $t['nama'], 'nip' => $t['nip'] ?? null,
-                        'pangkat' => $t['pangkat'] ?? null, 'jabatan' => $t['jabatan'] ?? null,
+                        'nama' => $t['nama'],
+                        'nip' => $t['nip'] ?? null,
+                        'pangkat' => $t['pangkat'] ?? null,
+                        'jabatan' => $t['jabatan'] ?? null,
                         'urutan' => $i + 1,
                     ]);
                 }
@@ -183,10 +189,32 @@ class VerifikasiController extends Controller
                 if (!empty($s['nama'])) {
                     Saksi::create([
                         'verifikasi_id' => $verifikasi->id,
-                        'nama' => $s['nama'], 'jabatan' => $s['jabatan'] ?? null,
+                        'nama' => $s['nama'],
+                        'jabatan' => $s['jabatan'] ?? null,
                         'urutan' => $i + 1,
                     ]);
                 }
+            }
+
+            if ($request->filled('pj_nama_pj') || $request->filled('pj_nama_perusahaan')) {
+                PenanggungJawabUsaha::updateOrCreate(
+                    ['verifikasi_id' => $verifikasi->id],
+                    [
+                        'nama_pj'            => $request->pj_nama_pj,
+                        'jabatan_pj'         => $request->pj_jabatan_pj,
+                        'nama_perusahaan'    => $request->pj_nama_perusahaan,
+                        'alamat_perusahaan'  => $request->pj_alamat,
+                        'bidang_usaha'       => $request->pj_bidang_usaha,
+                        'deskripsi_kegiatan' => $request->pj_deskripsi_kegiatan,
+                        'kbli'               => $request->pj_kbli,
+                        'nib'                => $request->pj_nib,
+                        'status_permodalan'  => $request->pj_status_permodalan,
+                        'koordinat_lat'      => $request->pj_koordinat_lat,
+                        'koordinat_lng'      => $request->pj_koordinat_lng,
+                        'no_telp'            => $request->pj_no_telp,
+                        'email'              => $request->pj_email,
+                    ]
+                );
             }
 
             if ($request->hasFile('foto')) {
@@ -205,6 +233,33 @@ class VerifikasiController extends Controller
 
         return redirect()->route('pengawas.tugas.show', $verifikasi->pengaduan_id)
             ->with('success', 'Verifikasi berhasil diperbarui.');
+    }
+
+    public function finalize(Request $request, VerifikasiLapangan $verifikasi)
+    {
+        abort_if($verifikasi->created_by !== Auth::id(), 403);
+
+        if ($verifikasi->timVerifikator->isEmpty()) {
+            return back()->with('error', 'Tambahkan Tim Verifikator terlebih dahulu.');
+        }
+
+        DB::transaction(function () use ($verifikasi) {
+            $verifikasi->update(['status' => 'selesai']);
+            $verifikasi->pengaduan->update(['status' => Pengaduan::STATUS_VERIFIKASI_SELESAI]);
+
+            if (!$verifikasi->beritaAcara) {
+                BeritaAcara::create([
+                    'verifikasi_id'  => $verifikasi->id,
+                    'nomor_ba'       => BeritaAcara::generateNomor(),
+                    'tanggal_terbit' => now()->toDateString(),
+                    'status'         => 'draft',
+                    'created_by'     => Auth::id(),
+                ]);
+            }
+        });
+
+        return redirect()->route('pengawas.berita-acara.show', $verifikasi->beritaAcara()->first())
+            ->with('success', 'Verifikasi selesai! Berita Acara otomatis dibuat.');
     }
 
     public function deleteFoto(VerifikasiLapangan $verifikasi, DokumentasiFoto $foto)

@@ -27,10 +27,12 @@ Route::prefix('pengawas')
         Route::patch('verifikasi/{verifikasi}',      [VerifikasiController::class, 'update'])->name('verifikasi.update');
         Route::post('verifikasi/{verifikasi}/foto',  [VerifikasiController::class, 'uploadFoto'])->name('verifikasi.foto');
         Route::delete('verifikasi/{verifikasi}/foto/{foto}', [VerifikasiController::class, 'deleteFoto'])->name('verifikasi.foto.delete');
+        Route::patch('verifikasi/{verifikasi}/finalize', [VerifikasiController::class, 'finalize'])->name('verifikasi.finalize');
 
         // ── Berita Acara ─────────────────────────────────────────
-        Route::get('berita-acara',      [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
-        Route::get('berita-acara/{ba}', [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
+        Route::get('berita-acara',          [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
+        Route::get('berita-acara/{ba}',     [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
+        Route::get('berita-acara/{ba}/pdf', [BeritaAcaraController::class, 'downloadPdf'])->name('berita-acara.pdf');
 
         // ── Tindak Lanjut ────────────────────────────────────────
         Route::get('tindak-lanjut', [TindakLanjutController::class, 'index'])->name('tindak-lanjut.index');

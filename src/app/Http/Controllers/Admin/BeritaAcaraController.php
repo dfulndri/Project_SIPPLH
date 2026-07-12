@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -22,10 +23,15 @@ class BeritaAcaraController extends Controller
     public function show(BeritaAcara $ba)
     {
         $ba->load([
-            'verifikasi.pengaduan.pelapor', 'verifikasi.pengaduan.terlapor',
-            'verifikasi.pengaduan.kecamatan', 'verifikasi.pengaduan.kelurahan',
-            'verifikasi.timVerifikator', 'verifikasi.penanggungJawab',
-            'verifikasi.dokumentasiFoto', 'verifikasi.saksi', 'pembuat',
+            'verifikasi.pengaduan.pelapor',
+            'verifikasi.pengaduan.terlapor',
+            'verifikasi.pengaduan.kecamatan',
+            'verifikasi.pengaduan.kelurahan',
+            'verifikasi.timVerifikator',
+            'verifikasi.penanggungJawab',
+            'verifikasi.dokumentasiFoto',
+            'verifikasi.saksi',
+            'pembuat',
         ]);
         return view('admin.berita-acara.show', compact('ba'));
     }
@@ -39,10 +45,14 @@ class BeritaAcaraController extends Controller
     public function downloadPdf(BeritaAcara $ba)
     {
         $ba->load([
-            'verifikasi.pengaduan.pelapor', 'verifikasi.pengaduan.terlapor',
+            'verifikasi.pengaduan.pelapor',
+            'verifikasi.pengaduan.terlapor',
             'verifikasi.pengaduan.kecamatan',
-            'verifikasi.timVerifikator', 'verifikasi.penanggungJawab',
-            'verifikasi.dokumentasiFoto', 'verifikasi.saksi', 'pembuat',
+            'verifikasi.timVerifikator',
+            'verifikasi.penanggungJawab',
+            'verifikasi.dokumentasiFoto',
+            'verifikasi.saksi',
+            'pembuat',
         ]);
 
         $profil = ProfilInstansi::getInstance();
@@ -61,7 +71,7 @@ class BeritaAcaraController extends Controller
 
         // Generate QR Code
         $verifyUrl = route('ba.verify', $ba->qr_code_token);
-        $qrCode = base64_encode(QrCode::format('png')->size(120)->margin(1)->generate($verifyUrl));
+        $qrCode = base64_encode(QrCode::format('svg')->size(120)->margin(0)->generate($verifyUrl));
 
         $pdf = Pdf::loadView('pdf.berita-acara', compact('ba', 'qrCode', 'profil', 'logoPath'))
             ->setPaper('A4', 'portrait');

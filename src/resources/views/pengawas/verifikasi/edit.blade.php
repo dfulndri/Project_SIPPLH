@@ -1,13 +1,20 @@
 @extends('layouts.pengawas')
-@section('title', 'Buat Verifikasi')
-@section('breadcrumb', 'Buat Verifikasi')
+@section('title', 'Edit Verifikasi')
+@section('breadcrumb', 'Edit Verifikasi')
 
 @section('content')
 
+    @php
+        $pengaduan = $verifikasi->pengaduan;
+        $pj = $verifikasi->penanggungJawab;
+        $timList = $verifikasi->timVerifikator;
+        $saksiList = $verifikasi->saksi;
+    @endphp
+
     <div class="page-hd d-flex align-items-center justify-content-between">
         <div>
-            <h1 class="page-ttl">Buat Verifikasi Lapangan</h1>
-            <p class="page-stl">Formulir laporan hasil verifikasi di lapangan.</p>
+            <h1 class="page-ttl">Edit Verifikasi Lapangan</h1>
+            <p class="page-stl">Perbarui data hasil verifikasi di lapangan.</p>
         </div>
         <a href="{{ route('pengawas.tugas.index') }}" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Kembali
@@ -45,9 +52,9 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('pengawas.verifikasi.store') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('pengawas.verifikasi.update', $verifikasi->id) }}" enctype="multipart/form-data">
         @csrf
-        <input type="hidden" name="pengaduan_id" value="{{ $pengaduan->id }}">
+        @method('PATCH')
 
         {{-- Tanggal & Tenggat --}}
         <div class="card-panel mb-3">
@@ -64,28 +71,29 @@
                     <div class="col-md-4">
                         <label class="form-label">Tanggal Verifikasi <span class="text-danger">*</span></label>
                         <input type="date" name="tanggal_verifikasi" class="form-control"
-                            value="{{ old('tanggal_verifikasi', now()->format('Y-m-d')) }}" required>
+                            value="{{ old('tanggal_verifikasi', optional($verifikasi->tanggal_verifikasi)->format('Y-m-d')) }}"
+                            required>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Jam Verifikasi</label>
                         <input type="time" name="jam_verifikasi" class="form-control"
-                            value="{{ old('jam_verifikasi', now()->format('H:i')) }}">
+                            value="{{ old('jam_verifikasi', $verifikasi->jam_verifikasi ? \Illuminate\Support\Str::substr($verifikasi->jam_verifikasi, 0, 5) : '') }}">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Tenggat Tindak Lanjut</label>
                         <input type="date" name="tenggat_tindak_lanjut" class="form-control"
-                            value="{{ old('tenggat_tindak_lanjut', now()->addDays(14)->format('Y-m-d')) }}">
+                            value="{{ old('tenggat_tindak_lanjut', optional($verifikasi->tenggat_tindak_lanjut)->format('Y-m-d')) }}">
                         <div class="form-text">Default 14 hari</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Koordinat Latitude</label>
-                        <input type="text" name="koordinat_lat" class="form-control" value="{{ old('koordinat_lat') }}"
-                            placeholder="-6.154588">
+                        <input type="text" name="koordinat_lat" class="form-control"
+                            value="{{ old('koordinat_lat', $verifikasi->koordinat_lat) }}" placeholder="-6.154588">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Koordinat Longitude</label>
-                        <input type="text" name="koordinat_lng" class="form-control" value="{{ old('koordinat_lng') }}"
-                            placeholder="106.574295">
+                        <input type="text" name="koordinat_lng" class="form-control"
+                            value="{{ old('koordinat_lng', $verifikasi->koordinat_lng) }}" placeholder="106.574295">
                     </div>
                 </div>
             </div>
@@ -114,31 +122,42 @@
                     @endforeach
                 </div>
                 <div id="tim-container">
-                    <div class="tim-row mb-2">
-                        <div class="row g-2 align-items-center">
-                            <div class="col-12 col-md-3">
-                                <input type="text" name="tim[0][nama]" class="form-control form-control-sm"
-                                    placeholder="Nama lengkap" value="{{ old('tim.0.nama', auth()->user()->name) }}">
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <input type="text" name="tim[0][nip]" class="form-control form-control-sm"
-                                    placeholder="NIP" value="{{ old('tim.0.nip', auth()->user()->nip) }}">
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <input type="text" name="tim[0][pangkat]" class="form-control form-control-sm"
-                                    placeholder="III/a">
-                            </div>
-                            <div class="col-10 col-md-3">
-                                <input type="text" name="tim[0][jabatan]" class="form-control form-control-sm"
-                                    placeholder="Jabatan" value="{{ old('tim.0.jabatan', auth()->user()->jabatan) }}">
-                            </div>
-                            <div class="col-2 col-md-1 text-end">
-                                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTim(this)">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                    @php $timRows = old('tim', $timList->map(fn($t)=>['nama'=>$t->nama,'nip'=>$t->nip,'pangkat'=>$t->pangkat,'jabatan'=>$t->jabatan])->toArray()); @endphp
+                    @if (empty($timRows))
+                        @php $timRows = [['nama'=>'','nip'=>'','pangkat'=>'','jabatan'=>'']]; @endphp
+                    @endif
+                    @foreach ($timRows as $idx => $t)
+                        <div class="tim-row mb-2">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-3">
+                                    <input type="text" name="tim[{{ $idx }}][nama]"
+                                        class="form-control form-control-sm" placeholder="Nama lengkap"
+                                        value="{{ $t['nama'] ?? '' }}">
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <input type="text" name="tim[{{ $idx }}][nip]"
+                                        class="form-control form-control-sm" placeholder="NIP"
+                                        value="{{ $t['nip'] ?? '' }}">
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <input type="text" name="tim[{{ $idx }}][pangkat]"
+                                        class="form-control form-control-sm" placeholder="III/a"
+                                        value="{{ $t['pangkat'] ?? '' }}">
+                                </div>
+                                <div class="col-10 col-md-3">
+                                    <input type="text" name="tim[{{ $idx }}][jabatan]"
+                                        class="form-control form-control-sm" placeholder="Jabatan"
+                                        value="{{ $t['jabatan'] ?? '' }}">
+                                </div>
+                                <div class="col-2 col-md-1 text-end">
+                                    <button type="button" class="btn btn-xs btn-outline-danger"
+                                        onclick="removeTim(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endforeach
                 </div>
                 @if ($pegawai->isNotEmpty())
                     <div class="mt-2 pt-2 border-top">
@@ -171,57 +190,61 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Nama PJ</label>
-                        <input type="text" name="pj_nama_pj" class="form-control" value="{{ old('pj_nama_pj') }}"
-                            placeholder="Nama penanggung jawab">
+                        <input type="text" name="pj_nama_pj" class="form-control"
+                            value="{{ old('pj_nama_pj', $pj?->nama_pj) }}" placeholder="Nama penanggung jawab">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Jabatan PJ</label>
                         <input type="text" name="pj_jabatan_pj" class="form-control"
-                            value="{{ old('pj_jabatan_pj') }}" placeholder="Direktur / Manajer">
+                            value="{{ old('pj_jabatan_pj', $pj?->jabatan_pj) }}" placeholder="Direktur / Manajer">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Nama Perusahaan</label>
                         <input type="text" name="pj_nama_perusahaan" class="form-control"
-                            value="{{ old('pj_nama_perusahaan', $pengaduan->terlapor?->nama) }}">
+                            value="{{ old('pj_nama_perusahaan', $pj?->nama_perusahaan ?? $pengaduan->terlapor?->nama) }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Bidang Usaha</label>
                         <input type="text" name="pj_bidang_usaha" class="form-control"
-                            value="{{ old('pj_bidang_usaha', $pengaduan->terlapor?->jenis_usaha) }}">
+                            value="{{ old('pj_bidang_usaha', $pj?->bidang_usaha ?? $pengaduan->terlapor?->jenis_usaha) }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Deskripsi Kegiatan</label>
                         <input type="text" name="pj_deskripsi_kegiatan" class="form-control"
-                            value="{{ old('pj_deskripsi_kegiatan') }}">
+                            value="{{ old('pj_deskripsi_kegiatan', $pj?->deskripsi_kegiatan) }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Status Permodalan</label>
                         <input type="text" name="pj_status_permodalan" class="form-control"
-                            value="{{ old('pj_status_permodalan') }}" placeholder="PMDN / PMA">
+                            value="{{ old('pj_status_permodalan', $pj?->status_permodalan) }}" placeholder="PMDN / PMA">
                     </div>
                     <div class="col-md-3"><label class="form-label">KBLI</label>
-                        <input type="text" name="pj_kbli" class="form-control" value="{{ old('pj_kbli') }}">
+                        <input type="text" name="pj_kbli" class="form-control"
+                            value="{{ old('pj_kbli', $pj?->kbli) }}">
                     </div>
                     <div class="col-md-3"><label class="form-label">NIB</label>
-                        <input type="text" name="pj_nib" class="form-control" value="{{ old('pj_nib') }}">
+                        <input type="text" name="pj_nib" class="form-control"
+                            value="{{ old('pj_nib', $pj?->nib) }}">
                     </div>
                     <div class="col-md-3"><label class="form-label">Telepon</label>
-                        <input type="text" name="pj_no_telp" class="form-control" value="{{ old('pj_no_telp') }}">
+                        <input type="text" name="pj_no_telp" class="form-control"
+                            value="{{ old('pj_no_telp', $pj?->no_telp) }}">
                     </div>
                     <div class="col-md-3"><label class="form-label">Email</label>
-                        <input type="email" name="pj_email" class="form-control" value="{{ old('pj_email') }}">
+                        <input type="email" name="pj_email" class="form-control"
+                            value="{{ old('pj_email', $pj?->email) }}">
                     </div>
                     <div class="col-md-6"><label class="form-label">Koordinat Lat (Kegiatan)</label>
                         <input type="text" name="pj_koordinat_lat" class="form-control"
-                            value="{{ old('pj_koordinat_lat') }}">
+                            value="{{ old('pj_koordinat_lat', $pj?->koordinat_lat) }}">
                     </div>
                     <div class="col-md-6"><label class="form-label">Koordinat Lng (Kegiatan)</label>
                         <input type="text" name="pj_koordinat_lng" class="form-control"
-                            value="{{ old('pj_koordinat_lng') }}">
+                            value="{{ old('pj_koordinat_lng', $pj?->koordinat_lng) }}">
                     </div>
                     <div class="col-12">
                         <label class="form-label">Alamat Perusahaan</label>
-                        <textarea name="pj_alamat" class="form-control" rows="2">{{ old('pj_alamat', $pengaduan->terlapor?->alamat) }}</textarea>
+                        <textarea name="pj_alamat" class="form-control" rows="2">{{ old('pj_alamat', $pj?->alamat_perusahaan ?? $pengaduan->terlapor?->alamat) }}</textarea>
                     </div>
                 </div>
             </div>
@@ -243,19 +266,19 @@
                         <label class="form-label"><span class="badge me-1" style="background:var(--maroon)">C</span>
                             Informasi Administrasi</label>
                         <textarea name="informasi_administrasi" class="form-control" rows="4"
-                            placeholder="Status perizinan, dokumen lingkungan, dll...">{{ old('informasi_administrasi') }}</textarea>
+                            placeholder="Status perizinan, dokumen lingkungan, dll...">{{ old('informasi_administrasi', $verifikasi->informasi_administrasi) }}</textarea>
                     </div>
                     <div class="col-12">
                         <label class="form-label"><span class="badge me-1" style="background:var(--maroon-md)">D</span>
                             Fakta Temuan Lapangan</label>
                         <textarea name="fakta_temuan" class="form-control" rows="5"
-                            placeholder="Uraikan fakta yang ditemukan di lapangan...">{{ old('fakta_temuan') }}</textarea>
+                            placeholder="Uraikan fakta yang ditemukan di lapangan...">{{ old('fakta_temuan', $verifikasi->fakta_temuan) }}</textarea>
                     </div>
                     <div class="col-12">
                         <label class="form-label"><span class="badge me-1" style="background:#10b981">E</span> Saran
                             Tindak Lanjut</label>
                         <textarea name="saran_tindak_lanjut" class="form-control" rows="4"
-                            placeholder="Rekomendasi dan langkah yang harus dilakukan...">{{ old('saran_tindak_lanjut') }}</textarea>
+                            placeholder="Rekomendasi dan langkah yang harus dilakukan...">{{ old('saran_tindak_lanjut', $verifikasi->saran_tindak_lanjut) }}</textarea>
                     </div>
                 </div>
             </div>
@@ -271,31 +294,67 @@
             </div>
             <div class="cp-body">
                 <div id="saksi-container">
-                    <div class="saksi-row mb-2">
-                        <div class="row g-2 align-items-center">
-                            <div class="col-12 col-md-6">
-                                <input type="text" name="saksi[0][nama]" class="form-control form-control-sm"
-                                    placeholder="Nama saksi" value="{{ old('saksi.0.nama') }}">
-                            </div>
-                            <div class="col-10 col-md-5">
-                                <input type="text" name="saksi[0][jabatan]" class="form-control form-control-sm"
-                                    placeholder="Jabatan (mis. Kepala Desa)" value="{{ old('saksi.0.jabatan') }}">
-                            </div>
-                            <div class="col-2 col-md-1 text-end">
-                                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeSaksi(this)">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                    @php $saksiRows = old('saksi', $saksiList->map(fn($s)=>['nama'=>$s->nama,'jabatan'=>$s->jabatan])->toArray()); @endphp
+                    @if (empty($saksiRows))
+                        @php $saksiRows = [['nama'=>'','jabatan'=>'']]; @endphp
+                    @endif
+                    @foreach ($saksiRows as $idx => $s)
+                        <div class="saksi-row mb-2">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-6">
+                                    <input type="text" name="saksi[{{ $idx }}][nama]"
+                                        class="form-control form-control-sm" placeholder="Nama saksi"
+                                        value="{{ $s['nama'] ?? '' }}">
+                                </div>
+                                <div class="col-10 col-md-5">
+                                    <input type="text" name="saksi[{{ $idx }}][jabatan]"
+                                        class="form-control form-control-sm" placeholder="Jabatan (mis. Kepala Desa)"
+                                        value="{{ $s['jabatan'] ?? '' }}">
+                                </div>
+                                <div class="col-2 col-md-1 text-end">
+                                    <button type="button" class="btn btn-xs btn-outline-danger"
+                                        onclick="removeSaksi(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
 
-        {{-- Foto --}}
+        {{-- Foto existing --}}
+        @if ($verifikasi->dokumentasiFoto->isNotEmpty())
+            <div class="card-panel mb-3">
+                <div class="cp-head">
+                    <div class="cp-title"><i class="bi bi-images me-1 text-muted"></i> Foto Tersimpan</div>
+                </div>
+                <div class="cp-body">
+                    <div class="row g-2">
+                        @foreach ($verifikasi->dokumentasiFoto as $foto)
+                            <div class="col-6 col-md-3">
+                                <div class="p-2 rounded" style="border:1px solid var(--border)">
+                                    <img src="{{ asset('storage/' . $foto->path_file) }}" class="w-100 rounded mb-1"
+                                        style="height:100px;object-fit:cover">
+                                    <div style="font-size:.72rem;color:var(--muted)" class="text-truncate">
+                                        {{ $foto->keterangan ?: $foto->nama_file }}</div>
+                                    <button type="button" class="btn btn-xs btn-outline-danger w-100 mt-1"
+                                        onclick="if(confirm('Hapus foto ini?')) document.getElementById('del-foto-{{ $foto->id }}').submit()">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Tambah Foto Baru --}}
         <div class="card-panel mb-3">
             <div class="cp-head">
-                <div class="cp-title"><i class="bi bi-camera me-1 text-muted"></i> Dokumentasi Foto</div>
+                <div class="cp-title"><i class="bi bi-camera me-1 text-muted"></i> Tambah Dokumentasi Foto</div>
             </div>
             <div class="cp-body">
                 <div id="foto-list">
@@ -332,16 +391,24 @@
                 <i class="bi bi-x-circle me-1"></i> Batal
             </a>
             <button type="submit" class="btn btn-maroon px-5">
-                <i class="bi bi-save me-1"></i> Simpan Verifikasi
+                <i class="bi bi-save me-1"></i> Perbarui Verifikasi
             </button>
         </div>
 
     </form>
+
+    {{-- Form hapus foto diletakkan DI LUAR form utama untuk menghindari nested form --}}
+    @foreach ($verifikasi->dokumentasiFoto as $foto)
+        <form id="del-foto-{{ $foto->id }}" method="POST"
+            action="{{ route('pengawas.verifikasi.foto.delete', [$verifikasi->id, $foto->id]) }}" class="d-none">
+            @csrf @method('DELETE')
+        </form>
+    @endforeach
 @endsection
 
 @push('scripts')
     <script>
-        let timIdx = 1;
+        let timIdx = document.querySelectorAll('.tim-row').length;
 
         function addTim() {
             const i = timIdx++;
