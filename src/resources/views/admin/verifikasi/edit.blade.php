@@ -44,9 +44,24 @@
                             value="{{ old('tanggal_verifikasi', $verifikasi->tanggal_verifikasi->format('Y-m-d')) }}">
                     </div>
                     <div class="col-md-4">
+                        <label class="form-label">Jam Verifikasi</label>
+                        <input type="time" name="jam_verifikasi" class="form-control"
+                            value="{{ old('jam_verifikasi', $verifikasi->jam_verifikasi ? \Illuminate\Support\Str::substr($verifikasi->jam_verifikasi, 0, 5) : '') }}">
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label">Tenggat Tindak Lanjut</label>
                         <input type="date" name="tenggat_tindak_lanjut" class="form-control"
                             value="{{ old('tenggat_tindak_lanjut', $verifikasi->tenggat_tindak_lanjut?->format('Y-m-d')) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Koordinat Latitude</label>
+                        <input type="number" step="any" name="koordinat_lat" class="form-control"
+                            value="{{ old('koordinat_lat', $verifikasi->koordinat_lat) }}" placeholder="-6.154588">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Koordinat Longitude</label>
+                        <input type="number" step="any" name="koordinat_lng" class="form-control"
+                            value="{{ old('koordinat_lng', $verifikasi->koordinat_lng) }}" placeholder="106.574295">
                     </div>
                 </div>
             </div>
@@ -101,7 +116,8 @@
                                         value="{{ old("tim.$i.jabatan", $t->jabatan) }}" placeholder="Jabatan">
                                 </div>
                                 <div class="col-2 col-md-1 text-end">
-                                    <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTim(this)">
+                                    <button type="button" class="btn btn-xs btn-outline-danger"
+                                        onclick="removeTim(this)">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -182,6 +198,16 @@
                         <input type="text" name="pj_bidang_usaha" class="form-control"
                             value="{{ old('pj_bidang_usaha', $pj?->bidang_usaha) }}">
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Deskripsi Kegiatan</label>
+                        <input type="text" name="pj_deskripsi_kegiatan" class="form-control"
+                            value="{{ old('pj_deskripsi_kegiatan', $pj?->deskripsi_kegiatan) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Status Permodalan</label>
+                        <input type="text" name="pj_status_permodalan" class="form-control"
+                            value="{{ old('pj_status_permodalan', $pj?->status_permodalan) }}" placeholder="PMDN / PMA">
+                    </div>
                     <div class="col-md-3">
                         <label class="form-label">KBLI</label>
                         <input type="text" name="pj_kbli" class="form-control"
@@ -230,18 +256,68 @@
                     <div class="col-12">
                         <label class="form-label"><span class="badge me-1" style="background:var(--maroon)">C</span>
                             Informasi Administrasi</label>
-                        <textarea name="informasi_administrasi" class="form-control" rows="4">{{ old('informasi_administrasi', $verifikasi->informasi_administrasi) }}</textarea>
+                        <textarea name="informasi_administrasi" class="rte-editor"
+                            data-placeholder="Status perizinan, dokumen lingkungan, dll...">{{ old('informasi_administrasi', $verifikasi->informasi_administrasi) }}</textarea>
                     </div>
                     <div class="col-12">
                         <label class="form-label"><span class="badge me-1" style="background:var(--maroon-md)">D</span>
                             Fakta Temuan</label>
-                        <textarea name="fakta_temuan" class="form-control" rows="5">{{ old('fakta_temuan', $verifikasi->fakta_temuan) }}</textarea>
+                        <textarea name="fakta_temuan" class="rte-editor" data-placeholder="Uraikan fakta yang ditemukan di lapangan...">{{ old('fakta_temuan', $verifikasi->fakta_temuan) }}</textarea>
                     </div>
                     <div class="col-12">
                         <label class="form-label"><span class="badge me-1" style="background:#10b981">E</span> Saran
                             Tindak Lanjut</label>
-                        <textarea name="saran_tindak_lanjut" class="form-control" rows="4">{{ old('saran_tindak_lanjut', $verifikasi->saran_tindak_lanjut) }}</textarea>
+                        <textarea name="saran_tindak_lanjut" class="rte-editor"
+                            data-placeholder="Rekomendasi dan langkah yang harus dilakukan...">{{ old('saran_tindak_lanjut', $verifikasi->saran_tindak_lanjut) }}</textarea>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Saksi-Saksi --}}
+        <div class="card-panel mb-3">
+            <div class="cp-head">
+                <div class="cp-title"><i class="bi bi-people me-1 text-muted"></i> Saksi-Saksi</div>
+                <button type="button" class="btn btn-sm btn-outline-maroon" onclick="addSaksi()">
+                    <i class="bi bi-plus-circle me-1"></i> Tambah Saksi
+                </button>
+            </div>
+            <div class="cp-body">
+                <div id="saksi-container">
+                    @php
+                        $saksiRows = old(
+                            'saksi',
+                            $verifikasi->saksi
+                                ->map(fn($s) => ['nama' => $s->nama, 'jabatan' => $s->jabatan])
+                                ->toArray(),
+                        );
+                        if (empty($saksiRows)) {
+                            $saksiRows = [['nama' => '', 'jabatan' => '']];
+                        }
+                    @endphp
+                    @foreach ($saksiRows as $idx => $s)
+                        <div class="saksi-row mb-2">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-6">
+                                    <input type="text" name="saksi[{{ $idx }}][nama]"
+                                        class="form-control form-control-sm" placeholder="Nama saksi"
+                                        value="{{ $s['nama'] ?? '' }}">
+                                </div>
+                                <div class="col-10 col-md-5">
+                                    <input type="text" name="saksi[{{ $idx }}][jabatan]"
+                                        class="form-control form-control-sm"
+                                        placeholder="Jabatan (mis. Kepala Desa, Ketua RT)"
+                                        value="{{ $s['jabatan'] ?? '' }}">
+                                </div>
+                                <div class="col-2 col-md-1 text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="removeSaksi(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
@@ -329,9 +405,36 @@
     </form>
 @endsection
 
+@include('partials.rte-assets')
+
 @push('scripts')
     <script>
         let timIdx = {{ $verifikasi->timVerifikator->count() ?: 1 }};
+
+        let saksiIdx = document.querySelectorAll('.saksi-row').length;
+
+        function addSaksi() {
+            const i = saksiIdx++;
+            const row = document.createElement('div');
+            row.className = 'saksi-row mb-2';
+            row.innerHTML = `
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-6">
+        <input type="text" name="saksi[${i}][nama]" class="form-control form-control-sm" placeholder="Nama saksi">
+      </div>
+      <div class="col-10 col-md-5">
+        <input type="text" name="saksi[${i}][jabatan]" class="form-control form-control-sm" placeholder="Jabatan">
+      </div>
+      <div class="col-2 col-md-1 text-end">
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSaksi(this)"><i class="bi bi-trash"></i></button>
+      </div>
+    </div>`;
+            document.getElementById('saksi-container').appendChild(row);
+        }
+
+        function removeSaksi(btn) {
+            if (document.querySelectorAll('.saksi-row').length > 1) btn.closest('.saksi-row').remove();
+        }
 
         function addTim() {
             const i = timIdx++;

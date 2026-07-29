@@ -265,20 +265,19 @@
                     <div class="col-12">
                         <label class="form-label"><span class="badge me-1" style="background:var(--maroon)">C</span>
                             Informasi Administrasi</label>
-                        <textarea name="informasi_administrasi" class="form-control" rows="4"
-                            placeholder="Status perizinan, dokumen lingkungan, dll...">{{ old('informasi_administrasi', $verifikasi->informasi_administrasi) }}</textarea>
+                        <textarea name="informasi_administrasi" class="rte-editor"
+                            data-placeholder="Status perizinan, dokumen lingkungan, dll...">{{ old('informasi_administrasi', $verifikasi->informasi_administrasi) }}</textarea>
                     </div>
                     <div class="col-12">
                         <label class="form-label"><span class="badge me-1" style="background:var(--maroon-md)">D</span>
                             Fakta Temuan Lapangan</label>
-                        <textarea name="fakta_temuan" class="form-control" rows="5"
-                            placeholder="Uraikan fakta yang ditemukan di lapangan...">{{ old('fakta_temuan', $verifikasi->fakta_temuan) }}</textarea>
+                        <textarea name="fakta_temuan" class="rte-editor" data-placeholder="Uraikan fakta yang ditemukan di lapangan...">{{ old('fakta_temuan', $verifikasi->fakta_temuan) }}</textarea>
                     </div>
                     <div class="col-12">
                         <label class="form-label"><span class="badge me-1" style="background:#10b981">E</span> Saran
                             Tindak Lanjut</label>
-                        <textarea name="saran_tindak_lanjut" class="form-control" rows="4"
-                            placeholder="Rekomendasi dan langkah yang harus dilakukan...">{{ old('saran_tindak_lanjut', $verifikasi->saran_tindak_lanjut) }}</textarea>
+                        <textarea name="saran_tindak_lanjut" class="rte-editor"
+                            data-placeholder="Rekomendasi dan langkah yang harus dilakukan...">{{ old('saran_tindak_lanjut', $verifikasi->saran_tindak_lanjut) }}</textarea>
                     </div>
                 </div>
             </div>
@@ -405,6 +404,8 @@
         </form>
     @endforeach
 @endsection
+
+@include('partials.rte-assets')
 
 @push('scripts')
     <script>

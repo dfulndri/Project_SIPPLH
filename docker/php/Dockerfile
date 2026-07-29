@@ -2,8 +2,11 @@ FROM php:8.3-fpm
 
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev \
-    libzip-dev libgd-dev zip unzip nodejs npm \
+    libzip-dev libgd-dev libjpeg-dev libfreetype6-dev zip unzip nodejs npm \
     && rm -rf /var/lib/apt/lists/*
+
+# Konfigurasi GD dengan dukungan JPEG & FreeType (WAJIB, tanpa ini imagejpeg() tidak tersedia)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 
 RUN docker-php-ext-install \
     pdo_mysql mbstring exif pcntl bcmath gd zip xml

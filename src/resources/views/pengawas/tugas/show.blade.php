@@ -4,6 +4,11 @@
 
 @push('styles')
     <style>
+        /* Halaman ini: card menyesuaikan tinggi konten, tidak melar (hindari ruang kosong) */
+        .card-panel {
+            height: auto !important;
+        }
+
         .tf-step {
             display: inline-flex;
             align-items: center;
@@ -44,6 +49,114 @@
             font-size: .88rem;
             color: var(--text);
             margin-bottom: .75rem;
+        }
+
+        /* Verifikasi sections */
+        .vsec-title {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--maroon);
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            padding-bottom: 4px;
+            margin: .25rem 0 .6rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vsec-empty {
+            font-size: .82rem;
+            font-style: italic;
+        }
+
+        .vtable {
+            font-size: .82rem;
+        }
+
+        .vtable thead th {
+            font-size: .7rem;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            color: var(--muted);
+            background: rgba(106, 0, 0, .05);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vtable td {
+            vertical-align: middle;
+        }
+
+        .vbox {
+            font-size: .86rem;
+            line-height: 1.7;
+            background: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: .6rem .8rem;
+            margin-top: 2px;
+        }
+
+        .rte-content p {
+            margin: 0 0 .5rem;
+        }
+
+        .rte-content ul,
+        .rte-content ol {
+            margin: .25rem 0 .5rem;
+            padding-left: 1.4rem;
+        }
+
+        .rte-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .rte-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: .5rem 0;
+        }
+
+        .rte-content table td,
+        .rte-content table th {
+            border: 1px solid #bbb;
+            padding: 4px 8px;
+        }
+
+        .vsaksi {
+            font-size: .86rem;
+            padding: .35rem .5rem;
+            background: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: .4rem;
+        }
+
+        .vsaksi-no {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--maroon);
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .vfoto {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: transform .15s;
+        }
+
+        .vfoto:hover {
+            transform: scale(1.03);
         }
     </style>
 @endpush
@@ -93,7 +206,7 @@
         @endforeach
     </div>
 
-    <div class="row g-3">
+    <div class="row g-3 align-items-start">
         <div class="col-md-8">
             {{-- Info Pengaduan --}}
             <div class="card-panel mb-3">
@@ -162,66 +275,193 @@
 
             {{-- Verifikasi --}}
             @if ($pengaduan->verifikasi)
+                @php
+                    $v = $pengaduan->verifikasi;
+                    $pj = $v->penanggungJawab;
+                @endphp
                 <div class="card-panel mb-3">
                     <div class="cp-head">
                         <div class="cp-title"><i class="bi bi-clipboard-check me-1"></i>Verifikasi Lapangan</div>
                         <div class="d-flex gap-1">
-                            @if ($pengaduan->verifikasi->status == 'draft')
-                                <a href="{{ route('pengawas.verifikasi.edit', $pengaduan->verifikasi) }}"
+                            @if ($v->status == 'draft')
+                                <a href="{{ route('pengawas.verifikasi.edit', $v) }}"
                                     class="btn btn-xs btn-outline-maroon"><i class="bi bi-pencil"></i> Edit</a>
-                                <form method="POST"
-                                    action="{{ route('pengawas.verifikasi.finalize', $pengaduan->verifikasi) }}"
+                                <form method="POST" action="{{ route('pengawas.verifikasi.finalize', $v) }}"
                                     class="d-inline"
                                     onsubmit="return confirm('Selesaikan verifikasi ini? Berita Acara akan dibuat otomatis.')">
                                     @csrf @method('PATCH')
                                     <button type="submit" class="btn btn-xs btn-success"><i class="bi bi-check2-all"></i>
                                         Selesaikan &amp; Buat BA</button>
                                 </form>
-                            @elseif($pengaduan->verifikasi->beritaAcara)
-                                <a href="{{ route('pengawas.berita-acara.show', $pengaduan->verifikasi->beritaAcara) }}"
+                            @elseif($v->beritaAcara)
+                                <a href="{{ route('pengawas.berita-acara.show', $v->beritaAcara) }}"
                                     class="btn btn-xs btn-outline-maroon"><i class="bi bi-file-text"></i> Lihat BA</a>
-                                <a href="{{ route('pengawas.berita-acara.pdf', $pengaduan->verifikasi->beritaAcara) }}"
+                                <a href="{{ route('pengawas.berita-acara.pdf', $v->beritaAcara) }}"
                                     class="btn btn-xs btn-success"><i class="bi bi-download"></i> PDF</a>
                             @endif
                         </div>
                     </div>
                     <div class="cp-body">
-                        <div class="row">
-                            <div class="col-md-3">
+
+                        {{-- Informasi Umum --}}
+                        <div class="vsec-title">Informasi Umum</div>
+                        <div class="row gx-3 gy-1 mb-3">
+                            <div class="col-6 col-md-3">
                                 <div class="info-label">Tanggal</div>
-                                <div class="info-value">{{ $pengaduan->verifikasi->tanggal_verifikasi->format('d M Y') }}
+                                <div class="info-value">{{ $v->tanggal_verifikasi->format('d M Y') }}</div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="info-label">Jam</div>
+                                <div class="info-value">
+                                    {{ $v->jam_verifikasi ? \Illuminate\Support\Str::substr($v->jam_verifikasi, 0, 5) : '—' }}
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-6 col-md-3">
                                 <div class="info-label">Status</div>
                                 <div class="info-value"><span
-                                        class="badge bg-{{ $pengaduan->verifikasi->status == 'selesai' ? 'success' : 'warning' }}">{{ ucfirst($pengaduan->verifikasi->status) }}</span>
+                                        class="badge bg-{{ $v->status == 'selesai' ? 'success' : 'warning' }}">{{ ucfirst($v->status) }}</span>
                                 </div>
                             </div>
-                            @if ($pengaduan->verifikasi->fakta_temuan)
-                                <div class="col-12">
-                                    <div class="info-label">Fakta Temuan</div>
-                                    <div class="info-value" style="white-space:pre-line">
-                                        {{ $pengaduan->verifikasi->fakta_temuan }}</div>
+                            <div class="col-6 col-md-3">
+                                <div class="info-label">Tenggat TL</div>
+                                <div class="info-value">{{ $v->tenggat_tindak_lanjut?->format('d M Y') ?? '—' }}</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="info-label">Koordinat</div>
+                                <div class="info-value">
+                                    {{ $v->koordinat_lat && $v->koordinat_lng ? $v->koordinat_lat . ', ' . $v->koordinat_lng : '—' }}
                                 </div>
-                            @endif
-                            @if ($pengaduan->verifikasi->saran_tindak_lanjut)
-                                <div class="col-12">
-                                    <div class="info-label">Saran Tindak Lanjut</div>
-                                    <div class="info-value" style="white-space:pre-line">
-                                        {{ $pengaduan->verifikasi->saran_tindak_lanjut }}</div>
-                                </div>
-                            @endif
+                            </div>
                         </div>
-                        @if ($pengaduan->verifikasi->dokumentasiFoto?->isNotEmpty())
-                            <div class="row g-2 mt-2">
-                                @foreach ($pengaduan->verifikasi->dokumentasiFoto as $foto)
-                                    <div class="col-md-3"><img src="{{ asset('storage/' . $foto->path_file) }}"
-                                            class="img-fluid rounded"
-                                            style="max-height:120px;width:100%;object-fit:cover"></div>
+
+                        {{-- Tim Verifikator --}}
+                        <div class="vsec-title">Tim Verifikator</div>
+                        @if ($v->timVerifikator->isNotEmpty())
+                            <div class="table-responsive mb-3">
+                                <table class="table table-sm vtable mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:32px">#</th>
+                                            <th>Nama</th>
+                                            <th>NIP</th>
+                                            <th>Pangkat</th>
+                                            <th>Jabatan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($v->timVerifikator as $t)
+                                            <tr>
+                                                <td>{{ $t->urutan }}</td>
+                                                <td class="fw-semibold">{{ $t->nama }}</td>
+                                                <td>{{ $t->nip ?: '—' }}</td>
+                                                <td>{{ $t->pangkat ?: '—' }}</td>
+                                                <td>{{ $t->jabatan ?: '—' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else<div class="text-muted vsec-empty mb-3">Belum ada tim verifikator</div>
+                        @endif
+
+                        {{-- Penanggung Jawab Usaha --}}
+                        <div class="vsec-title">Penanggung Jawab Usaha / Kegiatan</div>
+                        @if ($pj)
+                            <div class="row gx-3 gy-1 mb-3">
+                                <div class="col-6 col-md-3">
+                                    <div class="info-label">Nama PJ</div>
+                                    <div class="info-value">{{ $pj->nama_pj ?: '—' }}</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="info-label">Jabatan</div>
+                                    <div class="info-value">{{ $pj->jabatan_pj ?: '—' }}</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="info-label">Perusahaan</div>
+                                    <div class="info-value">{{ $pj->nama_perusahaan ?: '—' }}</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="info-label">Bidang Usaha</div>
+                                    <div class="info-value">{{ $pj->bidang_usaha ?: '—' }}</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="info-label">KBLI</div>
+                                    <div class="info-value">{{ $pj->kbli ?: '—' }}</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="info-label">NIB</div>
+                                    <div class="info-value">{{ $pj->nib ?: '—' }}</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="info-label">Status Permodalan</div>
+                                    <div class="info-value">{{ $pj->status_permodalan ?: '—' }}</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="info-label">Telepon</div>
+                                    <div class="info-value">{{ $pj->no_telp ?: '—' }}</div>
+                                </div>
+                                @if ($pj->deskripsi_kegiatan)
+                                    <div class="col-12">
+                                        <div class="info-label">Deskripsi Kegiatan</div>
+                                        <div class="info-value">{{ $pj->deskripsi_kegiatan }}</div>
+                                    </div>
+                                @endif
+                                @if ($pj->alamat_perusahaan)
+                                    <div class="col-12">
+                                        <div class="info-label">Alamat</div>
+                                        <div class="info-value">{{ $pj->alamat_perusahaan }}</div>
+                                    </div>
+                                @endif
+                            </div>
+                        @else<div class="text-muted vsec-empty mb-3">Belum diisi</div>
+                        @endif
+
+                        {{-- Temuan & Kesimpulan --}}
+                        <div class="vsec-title">Temuan &amp; Kesimpulan</div>
+                        <div class="mb-3">
+                            <div class="info-label">C. Informasi Administrasi</div>
+                            <div class="rte-content vbox">{!! $v->informasi_administrasi ?: '<span class="text-muted">—</span>' !!}</div>
+                            <div class="info-label mt-2">D. Fakta Temuan Lapangan</div>
+                            <div class="rte-content vbox">{!! $v->fakta_temuan ?: '<span class="text-muted">—</span>' !!}</div>
+                            <div class="info-label mt-2">E. Saran Tindak Lanjut</div>
+                            <div class="rte-content vbox">{!! $v->saran_tindak_lanjut ?: '<span class="text-muted">—</span>' !!}</div>
+                        </div>
+
+                        {{-- Saksi --}}
+                        <div class="vsec-title">Saksi-Saksi</div>
+                        @if ($v->saksi->isNotEmpty())
+                            <div class="row gx-3 gy-1 mb-3">
+                                @foreach ($v->saksi as $s)
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center gap-2 vsaksi">
+                                            <span class="vsaksi-no">{{ $s->urutan }}</span>
+                                            <div><span class="fw-semibold">{{ $s->nama }}</span>
+                                                @if ($s->jabatan)
+                                                    <span class="text-muted"> — {{ $s->jabatan }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endforeach
                             </div>
+                        @else<div class="text-muted vsec-empty mb-3">Belum ada saksi</div>
                         @endif
+
+                        {{-- Foto Tersimpan --}}
+                        <div class="vsec-title">Foto Tersimpan</div>
+                        @if ($v->dokumentasiFoto->isNotEmpty())
+                            <div class="row g-2">
+                                @foreach ($v->dokumentasiFoto as $foto)
+                                    <div class="col-4 col-md-2">
+                                        <img src="{{ asset('storage/' . $foto->path_file) }}" class="vfoto"
+                                            onclick="vOpenFoto(this.src,'{{ $foto->keterangan }}')"
+                                            alt="{{ $foto->keterangan }}">
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else<div class="text-muted vsec-empty">Belum ada foto</div>
+                        @endif
+
                     </div>
                 </div>
             @endif
@@ -285,3 +525,26 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <div class="modal fade" id="vPhotoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark border-0">
+                <div class="modal-header border-0 pb-0">
+                    <small id="vPhotoCap" class="text-white-50"></small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-2 text-center">
+                    <img id="vPhotoSrc" src="" style="max-width:100%;max-height:75vh;border-radius:4px">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function vOpenFoto(src, cap) {
+            document.getElementById('vPhotoSrc').src = src;
+            document.getElementById('vPhotoCap').textContent = cap || '';
+            new bootstrap.Modal(document.getElementById('vPhotoModal')).show();
+        }
+    </script>
+@endpush

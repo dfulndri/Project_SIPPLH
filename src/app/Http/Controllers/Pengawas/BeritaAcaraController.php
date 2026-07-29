@@ -41,6 +41,9 @@ class BeritaAcaraController extends Controller
     {
         abort_if($ba->verifikasi?->created_by !== Auth::id(), 403);
 
+        // Jaring pengaman: rendering PDF dengan foto bisa boros memori
+        @ini_set('memory_limit', '512M');
+
         $ba->load([
             'verifikasi.pengaduan.pelapor',
             'verifikasi.pengaduan.terlapor',
@@ -71,7 +74,10 @@ class BeritaAcaraController extends Controller
         $qrCode = base64_encode(QrCode::format('svg')->size(120)->margin(0)->generate($verifyUrl));
 
         $pdf = Pdf::loadView('pdf.berita-acara', compact('ba', 'qrCode', 'profil', 'logoPath'))
-            ->setPaper('A4', 'portrait');
+            ->setPaper('A4', 'portrait')
+            ->setOption('dpi', 96)
+            ->setOption('isRemoteEnabled', false)
+            ->setOption('isHtml5ParserEnabled', true);
 
         $filename = 'BA_' . str_replace(['/', '\\'], '_', $ba->nomor_ba) . '.pdf';
         $path     = 'berita-acara/pdf/' . $filename;

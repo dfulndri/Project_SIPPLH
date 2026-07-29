@@ -11,6 +11,7 @@ use App\Models\DokumentasiFoto;
 use App\Models\Saksi;
 use App\Models\BeritaAcara;
 use App\Models\User;
+use App\Support\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -73,9 +74,9 @@ class VerifikasiController extends Controller
                 'koordinat_lng'          => $request->koordinat_lng,
                 'nama_penanggung_jawab'  => $request->nama_penanggung_jawab,
                 'jabatan_pj'             => $request->jabatan_pj_verifikasi,
-                'informasi_administrasi' => $request->informasi_administrasi,
-                'fakta_temuan'           => $request->fakta_temuan,
-                'saran_tindak_lanjut'    => $request->saran_tindak_lanjut,
+                'informasi_administrasi' => HtmlSanitizer::clean($request->informasi_administrasi),
+                'fakta_temuan'           => HtmlSanitizer::clean($request->fakta_temuan),
+                'saran_tindak_lanjut'    => HtmlSanitizer::clean($request->saran_tindak_lanjut),
                 'tenggat_tindak_lanjut'  => $request->tenggat_tindak_lanjut,
                 'video_path'             => $videoPath,
                 'created_by'             => Auth::id(),
@@ -164,9 +165,9 @@ class VerifikasiController extends Controller
                 'koordinat_lng'          => $request->koordinat_lng,
                 'nama_penanggung_jawab'  => $request->nama_penanggung_jawab,
                 'jabatan_pj'             => $request->jabatan_pj_verifikasi,
-                'informasi_administrasi' => $request->informasi_administrasi,
-                'fakta_temuan'           => $request->fakta_temuan,
-                'saran_tindak_lanjut'    => $request->saran_tindak_lanjut,
+                'informasi_administrasi' => HtmlSanitizer::clean($request->informasi_administrasi),
+                'fakta_temuan'           => HtmlSanitizer::clean($request->fakta_temuan),
+                'saran_tindak_lanjut'    => HtmlSanitizer::clean($request->saran_tindak_lanjut),
                 'tenggat_tindak_lanjut'  => $request->tenggat_tindak_lanjut,
             ]);
 

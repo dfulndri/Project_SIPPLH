@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -10,6 +11,7 @@ use App\Models\DokumentasiFoto;
 use App\Models\Saksi;
 use App\Models\BeritaAcara;
 use App\Models\User;
+use App\Support\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -75,9 +77,9 @@ class VerifikasiController extends Controller
                 'koordinat_lng'          => $request->koordinat_lng,
                 'nama_penanggung_jawab'  => $request->nama_penanggung_jawab,
                 'jabatan_pj'             => $request->jabatan_pj_verifikasi,
-                'informasi_administrasi' => $request->informasi_administrasi,
-                'fakta_temuan'           => $request->fakta_temuan,
-                'saran_tindak_lanjut'    => $request->saran_tindak_lanjut,
+                'informasi_administrasi' => HtmlSanitizer::clean($request->informasi_administrasi),
+                'fakta_temuan'           => HtmlSanitizer::clean($request->fakta_temuan),
+                'saran_tindak_lanjut'    => HtmlSanitizer::clean($request->saran_tindak_lanjut),
                 'tenggat_tindak_lanjut'  => $request->tenggat_tindak_lanjut,
                 'video_path'             => $videoPath,
                 'created_by'             => Auth::id(),
@@ -109,7 +111,7 @@ class VerifikasiController extends Controller
                     'nama_perusahaan'   => $request->pj_nama_perusahaan,
                     'alamat_perusahaan' => $request->pj_alamat,
                     'bidang_usaha'      => $request->pj_bidang_usaha,
-                    'deskripsi_kegiatan'=> $request->pj_deskripsi_kegiatan,
+                    'deskripsi_kegiatan' => $request->pj_deskripsi_kegiatan,
                     'kbli'              => $request->pj_kbli,
                     'nib'               => $request->pj_nib,
                     'status_permodalan' => $request->pj_status_permodalan,
@@ -153,9 +155,16 @@ class VerifikasiController extends Controller
     public function show(VerifikasiLapangan $verifikasi)
     {
         $verifikasi->load([
-            'pengaduan.pelapor', 'pengaduan.terlapor', 'pengaduan.kecamatan',
-            'timVerifikator', 'penanggungJawab', 'dokumentasiFoto',
-            'saksi', 'tandaTangan', 'beritaAcara', 'pembuat',
+            'pengaduan.pelapor',
+            'pengaduan.terlapor',
+            'pengaduan.kecamatan',
+            'timVerifikator',
+            'penanggungJawab',
+            'dokumentasiFoto',
+            'saksi',
+            'tandaTangan',
+            'beritaAcara',
+            'pembuat',
         ]);
         return view('admin.verifikasi.show', compact('verifikasi'));
     }
@@ -189,9 +198,9 @@ class VerifikasiController extends Controller
                 'koordinat_lng'          => $request->koordinat_lng,
                 'nama_penanggung_jawab'  => $request->nama_penanggung_jawab,
                 'jabatan_pj'             => $request->jabatan_pj_verifikasi,
-                'informasi_administrasi' => $request->informasi_administrasi,
-                'fakta_temuan'           => $request->fakta_temuan,
-                'saran_tindak_lanjut'    => $request->saran_tindak_lanjut,
+                'informasi_administrasi' => HtmlSanitizer::clean($request->informasi_administrasi),
+                'fakta_temuan'           => HtmlSanitizer::clean($request->fakta_temuan),
+                'saran_tindak_lanjut'    => HtmlSanitizer::clean($request->saran_tindak_lanjut),
                 'tenggat_tindak_lanjut'  => $request->tenggat_tindak_lanjut,
             ]);
 
@@ -201,8 +210,10 @@ class VerifikasiController extends Controller
                 if (!empty($t['nama'])) {
                     TimVerifikator::create([
                         'verifikasi_id' => $verifikasi->id,
-                        'nama'    => $t['nama'], 'nip' => $t['nip'] ?? null,
-                        'pangkat' => $t['pangkat'] ?? null, 'jabatan' => $t['jabatan'] ?? null,
+                        'nama'    => $t['nama'],
+                        'nip' => $t['nip'] ?? null,
+                        'pangkat' => $t['pangkat'] ?? null,
+                        'jabatan' => $t['jabatan'] ?? null,
                         'urutan'  => $i + 1,
                     ]);
                 }
@@ -214,7 +225,8 @@ class VerifikasiController extends Controller
                 if (!empty($s['nama'])) {
                     Saksi::create([
                         'verifikasi_id' => $verifikasi->id,
-                        'nama' => $s['nama'], 'jabatan' => $s['jabatan'] ?? null,
+                        'nama' => $s['nama'],
+                        'jabatan' => $s['jabatan'] ?? null,
                         'urutan' => $i + 1,
                     ]);
                 }
@@ -230,7 +242,7 @@ class VerifikasiController extends Controller
                         'nama_perusahaan'   => $request->pj_nama_perusahaan,
                         'alamat_perusahaan' => $request->pj_alamat,
                         'bidang_usaha'      => $request->pj_bidang_usaha,
-                        'deskripsi_kegiatan'=> $request->pj_deskripsi_kegiatan,
+                        'deskripsi_kegiatan' => $request->pj_deskripsi_kegiatan,
                         'kbli'              => $request->pj_kbli,
                         'nib'               => $request->pj_nib,
                         'status_permodalan' => $request->pj_status_permodalan,

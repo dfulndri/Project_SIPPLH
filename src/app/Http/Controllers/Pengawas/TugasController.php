@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Pengawas;
 
 use App\Http\Controllers\Controller;
@@ -27,11 +28,17 @@ class TugasController extends Controller
         abort_if($pengaduan->assigned_to !== Auth::id(), 403, 'Anda tidak memiliki akses ke tugas ini.');
 
         $pengaduan->load([
-            'pelapor.kecamatan', 'pelapor.kelurahan',
-            'terlapor', 'kecamatan', 'kelurahan',
+            'pelapor.kecamatan',
+            'pelapor.kelurahan',
+            'terlapor',
+            'kecamatan',
+            'kelurahan',
             'disposisi.pembuat',
-            'verifikasi.timVerifikator', 'verifikasi.saksi',
-            'verifikasi.beritaAcara', 'verifikasi.dokumentasiFoto',
+            'verifikasi.timVerifikator',
+            'verifikasi.saksi',
+            'verifikasi.penanggungJawab',
+            'verifikasi.beritaAcara',
+            'verifikasi.dokumentasiFoto',
             'tindakLanjut',
         ]);
 

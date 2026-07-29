@@ -187,8 +187,8 @@
         </div>
         <div class="cp-body">
             @if ($verifikasi->informasi_administrasi)
-                <div style="font-size:.875rem;line-height:1.8;white-space:pre-line">
-                    {{ $verifikasi->informasi_administrasi }}</div>
+                <div class="rte-content" style="font-size:.875rem;line-height:1.8">
+                    {!! $verifikasi->informasi_administrasi !!}</div>
             @else
                 <div class="text-muted" style="font-size:.85rem"><i class="bi bi-dash"></i> Belum diisi</div>
             @endif
@@ -205,7 +205,7 @@
         </div>
         <div class="cp-body">
             @if ($verifikasi->fakta_temuan)
-                <div style="font-size:.875rem;line-height:1.8;white-space:pre-line">{{ $verifikasi->fakta_temuan }}</div>
+                <div class="rte-content" style="font-size:.875rem;line-height:1.8">{!! $verifikasi->fakta_temuan !!}</div>
             @else
                 <div class="text-muted" style="font-size:.85rem"><i class="bi bi-dash"></i> Belum diisi</div>
             @endif
@@ -233,7 +233,7 @@
         </div>
         <div class="cp-body">
             @if ($verifikasi->saran_tindak_lanjut)
-                <div style="font-size:.875rem;line-height:1.8;white-space:pre-line">{{ $verifikasi->saran_tindak_lanjut }}
+                <div class="rte-content" style="font-size:.875rem;line-height:1.8">{!! $verifikasi->saran_tindak_lanjut !!}
                 </div>
             @else
                 <div class="text-muted" style="font-size:.85rem"><i class="bi bi-dash"></i> Belum diisi</div>
@@ -307,6 +307,50 @@
     </div>
 
 @endsection
+
+@push('styles')
+    <style>
+        .rte-content p {
+            margin: 0 0 .5rem;
+        }
+
+        .rte-content ul,
+        .rte-content ol {
+            margin: .25rem 0 .5rem;
+            padding-left: 1.4rem;
+        }
+
+        .rte-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .rte-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: .5rem 0;
+        }
+
+        .rte-content table td,
+        .rte-content table th {
+            border: 1px solid #bbb;
+            padding: 4px 8px;
+        }
+
+        .rte-content .ql-align-center,
+        .rte-content [style*="text-align:center"] {
+            text-align: center;
+        }
+
+        .rte-content .ql-align-right {
+            text-align: right;
+        }
+
+        .rte-content .ql-align-justify {
+            text-align: justify;
+        }
+    </style>
+@endpush
 
 @push('scripts')
     <script>
