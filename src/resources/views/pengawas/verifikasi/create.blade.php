@@ -354,12 +354,12 @@
             const r = document.createElement('div');
             r.className = 'tim-row mb-2';
             r.innerHTML = `<div class="row g-2 align-items-center">
-    <div class="col-12 col-md-3"><input type="text" name="tim[${i}][nama]" class="form-control form-control-sm" placeholder="Nama"></div>
-    <div class="col-6 col-md-2"><input type="text" name="tim[${i}][nip]" class="form-control form-control-sm" placeholder="NIP"></div>
-    <div class="col-6 col-md-2"><input type="text" name="tim[${i}][pangkat]" class="form-control form-control-sm" placeholder="III/a"></div>
-    <div class="col-10 col-md-3"><input type="text" name="tim[${i}][jabatan]" class="form-control form-control-sm" placeholder="Jabatan"></div>
-    <div class="col-2 col-md-1 text-end"><button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTim(this)"><i class="bi bi-trash"></i></button></div>
-  </div>`;
+            <div class="col-12 col-md-3"><input type="text" name="tim[${i}][nama]" class="form-control form-control-sm" placeholder="Nama"></div>
+            <div class="col-6 col-md-2"><input type="text" name="tim[${i}][nip]" class="form-control form-control-sm" placeholder="NIP"></div>
+            <div class="col-6 col-md-2"><input type="text" name="tim[${i}][pangkat]" class="form-control form-control-sm" placeholder="III/a"></div>
+            <div class="col-10 col-md-3"><input type="text" name="tim[${i}][jabatan]" class="form-control form-control-sm" placeholder="Jabatan"></div>
+            <div class="col-2 col-md-1 text-end"><button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTim(this)"><i class="bi bi-trash"></i></button></div>
+        </div>`;
             document.getElementById('tim-container').appendChild(r);
         }
 
@@ -384,10 +384,10 @@
             const r = document.createElement('div');
             r.className = 'saksi-row mb-2';
             r.innerHTML = `<div class="row g-2 align-items-center">
-    <div class="col-12 col-md-6"><input type="text" name="saksi[${i}][nama]" class="form-control form-control-sm" placeholder="Nama saksi"></div>
-    <div class="col-10 col-md-5"><input type="text" name="saksi[${i}][jabatan]" class="form-control form-control-sm" placeholder="Jabatan"></div>
-    <div class="col-2 col-md-1 text-end"><button type="button" class="btn btn-xs btn-outline-danger" onclick="removeSaksi(this)"><i class="bi bi-trash"></i></button></div>
-  </div>`;
+            <div class="col-12 col-md-6"><input type="text" name="saksi[${i}][nama]" class="form-control form-control-sm" placeholder="Nama saksi"></div>
+            <div class="col-10 col-md-5"><input type="text" name="saksi[${i}][jabatan]" class="form-control form-control-sm" placeholder="Jabatan"></div>
+            <div class="col-2 col-md-1 text-end"><button type="button" class="btn btn-xs btn-outline-danger" onclick="removeSaksi(this)"><i class="bi bi-trash"></i></button></div>
+        </div>`;
             document.getElementById('saksi-container').appendChild(r);
         }
 
@@ -486,6 +486,4 @@
             });
         })();
     </script>
-@endpush
-</script>
 @endpush
