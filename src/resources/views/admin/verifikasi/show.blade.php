@@ -141,7 +141,7 @@
             @if ($verifikasi->penanggungJawab)
                 @php $pj = $verifikasi->penanggungJawab; @endphp
                 <div class="row g-3">
-                    @foreach ([['Nama PJ', $pj->nama_pj], ['Jabatan', $pj->jabatan_pj ?: '—'], ['Nama Perusahaan', $pj->nama_perusahaan], ['Bidang Usaha', $pj->bidang_usaha ?: '—'], ['KBLI', $pj->kbli ?: '—'], ['NIB', $pj->nib ?: '—'], ['No. Telepon', $pj->no_telp ?: '—'], ['Email', $pj->email ?: '—']] as [$lbl, $val])
+                    @foreach ([['Nama PJ', $pj->nama_pj], ['Jabatan', $pj->jabatan_pj ?: '—'], ['Nama Perusahaan', $pj->nama_perusahaan], ['Bidang Usaha', $pj->bidang_usaha ?: '—'], ['KBLI', $pj->kbli_display ?: '—'], ['NIB', $pj->nib ?: '—'], ['No. Telepon', $pj->no_telp ?: '—'], ['Email', $pj->email ?: '—']] as [$lbl, $val])
                         <div class="col-6 col-md-3">
                             <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
                                 {{ $lbl }}</div>

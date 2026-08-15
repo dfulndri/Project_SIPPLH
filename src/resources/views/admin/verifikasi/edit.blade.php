@@ -208,10 +208,20 @@
                         <input type="text" name="pj_status_permodalan" class="form-control"
                             value="{{ old('pj_status_permodalan', $pj?->status_permodalan) }}" placeholder="PMDN / PMA">
                     </div>
-                    <div class="col-md-3">
+                    {{-- <div class="col-md-3">
                         <label class="form-label">KBLI</label>
                         <input type="text" name="pj_kbli" class="form-control"
                             value="{{ old('pj_kbli', $pj?->kbli) }}">
+                    </div> --}}
+                    <div class="col-md-3 position-relative">
+                        <label class="form-label">KBLI</label>
+                        <input type="text" id="kbliSearch" class="form-control" autocomplete="off"
+                            value="{{ old('pj_kbli_display', $pj?->kbli_display) }}"
+                            placeholder="Ketik kode atau kata kunci, mis: kertas">
+                        <input type="hidden" id="kbliInput" name="pj_kbli_id"
+                            value="{{ old('pj_kbli_id', $pj?->kbli_id) }}">
+                        <div id="kbliResults" class="list-group position-absolute w-100"
+                            style="z-index:1000; max-height:240px; overflow-y:auto; display:none; font-size:.82rem;"></div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">NIB</label>

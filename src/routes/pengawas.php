@@ -40,4 +40,19 @@ Route::prefix('pengawas')
         // ── Profil ───────────────────────────────────────────────
         Route::get('profil',   [ProfilController::class, 'edit'])->name('profil.edit');
         Route::patch('profil', [ProfilController::class, 'update'])->name('profil.update');
+
+        // ── AJAX: pencarian KBLI ──────────────────────────────────
+        Route::get('master/kbli-json', function (\Illuminate\Http\Request $request) {
+            $q = trim($request->get('q', ''));
+            if (strlen($q) < 2) return response()->json([]);
+
+            return \App\Models\MasterKbli::where('is_active', true)
+                ->where(function ($query) use ($q) {
+                    $query->where('kode_kbli', 'like', "%{$q}%")
+                        ->orWhere('judul', 'like', "%{$q}%");
+                })
+                ->orderBy('kode_kbli')
+                ->limit(20)
+                ->get(['id', 'kode_kbli', 'judul']);
+        })->name('master.kbli.json');
     });

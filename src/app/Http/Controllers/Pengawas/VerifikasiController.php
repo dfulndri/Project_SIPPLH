@@ -57,6 +57,7 @@ class VerifikasiController extends Controller
             'saksi.*.nama'           => ['nullable', 'string'],
             'foto.*'                 => ['nullable', 'file', 'image', 'max:5120'],
             'video'                  => ['nullable', 'file', 'mimes:mp4,avi,mov,wmv', 'max:51200'],
+            'pj_kbli_id' => 'nullable|exists:master_kbli,id',
         ]);
 
         $newId = null;
@@ -107,7 +108,7 @@ class VerifikasiController extends Controller
                     'alamat_perusahaan' => $request->pj_alamat,
                     'bidang_usaha'      => $request->pj_bidang_usaha,
                     'deskripsi_kegiatan' => $request->pj_deskripsi_kegiatan,
-                    'kbli'              => $request->pj_kbli,
+                    'kbli_id'           => $request->pj_kbli_id,
                     'nib'               => $request->pj_nib,
                     'status_permodalan' => $request->pj_status_permodalan,
                     'koordinat_lat'     => $request->pj_koordinat_lat,
@@ -207,7 +208,7 @@ class VerifikasiController extends Controller
                         'alamat_perusahaan'  => $request->pj_alamat,
                         'bidang_usaha'       => $request->pj_bidang_usaha,
                         'deskripsi_kegiatan' => $request->pj_deskripsi_kegiatan,
-                        'kbli'               => $request->pj_kbli,
+                        'kbli_id'           => $request->pj_kbli_id,
                         'nib'                => $request->pj_nib,
                         'status_permodalan'  => $request->pj_status_permodalan,
                         'koordinat_lat'      => $request->pj_koordinat_lat,

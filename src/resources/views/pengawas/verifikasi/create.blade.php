@@ -199,8 +199,13 @@
                         <input type="text" name="pj_status_permodalan" class="form-control"
                             value="{{ old('pj_status_permodalan') }}" placeholder="PMDN / PMA">
                     </div>
-                    <div class="col-md-3"><label class="form-label">KBLI</label>
-                        <input type="text" name="pj_kbli" class="form-control" value="{{ old('pj_kbli') }}">
+                    <div class="col-md-3 position-relative">
+                        <label class="form-label">KBLI</label>
+                        <input type="text" id="kbliSearch" class="form-control" autocomplete="off"
+                            placeholder="Ketik kode atau kata kunci, mis: kertas">
+                        <input type="hidden" id="kbliInput" name="pj_kbli_id" value="{{ old('pj_kbli_id') }}">
+                        <div id="kbliResults" class="list-group position-absolute w-100"
+                            style="z-index:1000; max-height:240px; overflow-y:auto; display:none; font-size:.82rem;"></div>
                     </div>
                     <div class="col-md-3"><label class="form-label">NIB</label>
                         <input type="text" name="pj_nib" class="form-control" value="{{ old('pj_nib') }}">
@@ -415,5 +420,72 @@
                 r.readAsDataURL(inp.files[0]);
             }
         }
+
+        function previewFoto(inp) {
+            const p = inp.closest('.foto-item').querySelector('.foto-preview');
+            if (inp.files[0]) {
+                const r = new FileReader();
+                r.onload = e => {
+                    p.src = e.target.result;
+                    p.classList.remove('d-none')
+                };
+                r.readAsDataURL(inp.files[0]);
+            }
+        }
+
+        // ── Pencarian KBLI ──────────────────────────────────────────
+        (function() {
+            const search = document.getElementById('kbliSearch');
+            const hidden = document.getElementById('kbliInput');
+            const results = document.getElementById('kbliResults');
+            if (!search) return; // jaga-jaga kalau elemen belum ada di halaman ini
+            let timer = null;
+
+            search.addEventListener('input', function() {
+                clearTimeout(timer);
+                hidden.value = '';
+                const q = this.value.trim();
+                if (q.length < 2) {
+                    results.style.display = 'none';
+                    return;
+                }
+
+                timer = setTimeout(() => {
+                    fetch(`{{ route('pengawas.master.kbli.json') }}?q=${encodeURIComponent(q)}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            results.innerHTML = '';
+                            if (data.length === 0) {
+                                results.style.display = 'none';
+                                return;
+                            }
+                            data.forEach(item => {
+                                const a = document.createElement('a');
+                                a.href = '#';
+                                a.className = 'list-group-item list-group-item-action';
+                                a.innerHTML =
+                                    `<strong>${item.kode_kbli}</strong> — ${item.judul}`;
+                                a.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    search.value =
+                                        `${item.kode_kbli} - ${item.judul}`;
+                                    hidden.value = item.id;
+                                    results.style.display = 'none';
+                                });
+                                results.appendChild(a);
+                            });
+                            results.style.display = 'block';
+                        });
+                }, 250);
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!search.contains(e.target) && !results.contains(e.target)) {
+                    results.style.display = 'none';
+                }
+            });
+        })();
     </script>
+@endpush
+</script>
 @endpush

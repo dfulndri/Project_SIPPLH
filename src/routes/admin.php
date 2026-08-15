@@ -92,4 +92,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
             ->where('is_active', true)->orderBy('nama_kelurahan')
             ->get(['id', 'nama_kelurahan']);
     })->name('master.kelurahan.json');
+
+    // ── AJAX: pencarian KBLI ──────────────────────────────────────
+    Route::get('master/kbli-json', function (\Illuminate\Http\Request $request) {
+        $q = trim($request->get('q', ''));
+        if (strlen($q) < 2) return response()->json([]);
+
+        return \App\Models\MasterKbli::where('is_active', true)
+            ->where(function ($query) use ($q) {
+                $query->where('kode_kbli', 'like', "%{$q}%")
+                    ->orWhere('judul', 'like', "%{$q}%");
+            })
+            ->orderBy('kode_kbli')
+            ->limit(20)
+            ->get(['id', 'kode_kbli', 'judul']);
+    })->name('master.kbli.json');
 });
