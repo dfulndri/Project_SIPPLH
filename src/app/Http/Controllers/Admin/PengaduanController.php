@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -25,8 +26,8 @@ class PengaduanController extends Controller
             $s = $request->search;
             $query->where(function ($q) use ($s) {
                 $q->where('nomor_pengaduan', 'like', "%{$s}%")
-                  ->orWhereHas('pelapor',  fn($r) => $r->where('nama_pelapor', 'like', "%{$s}%"))
-                  ->orWhereHas('terlapor', fn($r) => $r->where('nama', 'like', "%{$s}%"));
+                    ->orWhereHas('pelapor',  fn($r) => $r->where('nama_pelapor', 'like', "%{$s}%"))
+                    ->orWhereHas('terlapor', fn($r) => $r->where('nama', 'like', "%{$s}%"));
             });
         }
 
@@ -58,7 +59,7 @@ class PengaduanController extends Controller
             $pelapor = Pelapor::create([
                 'nama_pelapor'       => $request->nama_pelapor,
                 'jenis_pelapor'      => $request->jenis_pelapor ?? 'perorangan',
-                'nik'                => $request->nik,
+                'nik'                => null, // field NIK dihapus dari form, sesuai Poin 2
                 'alamat'             => $request->alamat_pelapor,
                 'no_telp'            => $request->no_telp_pelapor,
                 'email'              => $request->email_pelapor,
@@ -68,6 +69,7 @@ class PengaduanController extends Controller
                 'nama_lembaga'       => $request->nama_lembaga,
                 'jabatan_di_lembaga' => $request->jabatan_di_lembaga,
                 'npwp'               => $request->npwp_pelapor,
+                'nib'                => $request->nib_pelapor,
             ]);
 
             $terlapor = Terlapor::create([
@@ -76,8 +78,11 @@ class PengaduanController extends Controller
                 'alamat'           => $request->alamat_terlapor,
                 'no_telp'          => $request->no_telp_terlapor,
                 'jenis_usaha'      => $request->jenis_usaha,
-                'nama_perusahaan'  => $request->nama_perusahaan,
+                // Untuk Badan Hukum, cermin nilai identitas ke nama_perusahaan juga,
+                // supaya tetap kompatibel dengan halaman Data Master > Data Perusahaan.
+                'nama_perusahaan'  => $request->jenis_terlapor === 'badan_hukum' ? $request->nama_terlapor : null,
                 'nib'              => $request->nib_terlapor,
+                'npwp'             => $request->npwp_terlapor,
                 'bidang_usaha'     => $request->bidang_usaha_terlapor,
                 'penanggung_jawab' => $request->penanggung_jawab_terlapor,
                 'jabatan_pj'       => $request->jabatan_pj_terlapor,
@@ -113,10 +118,16 @@ class PengaduanController extends Controller
     public function show(Pengaduan $pengaduan)
     {
         $pengaduan->load([
-            'pelapor.kecamatan', 'pelapor.kelurahan',
-            'terlapor', 'kecamatan', 'kelurahan',
-            'assignedTo', 'disposisi.pengawas', 'disposisi.pembuat',
-            'verifikasi.beritaAcara', 'verifikasi.timVerifikator',
+            'pelapor.kecamatan',
+            'pelapor.kelurahan',
+            'terlapor',
+            'kecamatan',
+            'kelurahan',
+            'assignedTo',
+            'disposisi.pengawas',
+            'disposisi.pembuat',
+            'verifikasi.beritaAcara',
+            'verifikasi.timVerifikator',
             'tindakLanjut',
         ]);
 
@@ -143,7 +154,7 @@ class PengaduanController extends Controller
             $pengaduan->pelapor->update([
                 'nama_pelapor'       => $request->nama_pelapor,
                 'jenis_pelapor'      => $request->jenis_pelapor ?? 'perorangan',
-                'nik'                => $request->nik,
+                'nik'                => null, // field NIK dihapus dari form, sesuai Poin 2
                 'alamat'             => $request->alamat_pelapor,
                 'no_telp'            => $request->no_telp_pelapor,
                 'email'              => $request->email_pelapor,
@@ -152,6 +163,8 @@ class PengaduanController extends Controller
                 'anonim'             => $request->boolean('anonim'),
                 'nama_lembaga'       => $request->nama_lembaga,
                 'jabatan_di_lembaga' => $request->jabatan_di_lembaga,
+                'npwp'               => $request->npwp_pelapor,
+                'nib'                => $request->nib_pelapor,
             ]);
 
             $pengaduan->terlapor->update([
@@ -160,7 +173,12 @@ class PengaduanController extends Controller
                 'alamat'           => $request->alamat_terlapor,
                 'no_telp'          => $request->no_telp_terlapor,
                 'jenis_usaha'      => $request->jenis_usaha,
-                'nama_perusahaan'  => $request->nama_perusahaan,
+                'nama_perusahaan'  => $request->jenis_terlapor === 'badan_hukum' ? $request->nama_terlapor : null,
+                'nib'              => $request->nib_terlapor,
+                'npwp'             => $request->npwp_terlapor,
+                'bidang_usaha'     => $request->bidang_usaha_terlapor,
+                'penanggung_jawab' => $request->penanggung_jawab_terlapor,
+                'jabatan_pj'       => $request->jabatan_pj_terlapor,
             ]);
 
             $docPath = $pengaduan->dokumen_pendukung;

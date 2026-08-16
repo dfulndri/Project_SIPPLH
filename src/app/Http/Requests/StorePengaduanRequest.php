@@ -37,18 +37,19 @@ class StorePengaduanRequest extends FormRequest
             'kecamatan_pelapor' => ['nullable', 'exists:master_kecamatan,id'],
             'kelurahan_pelapor' => ['nullable', 'exists:master_kelurahan,id'],
             'anonim'            => ['nullable', 'boolean'],
-            'nama_lembaga'      => ['nullable', 'string', 'max:255'],
-            'jabatan_di_lembaga'=> ['nullable', 'string', 'max:255'],
+            'nama_lembaga'      => ['nullable', 'string', 'max:255', 'required_if:jenis_pelapor,lembaga,badan_hukum'],
+            'jabatan_di_lembaga' => ['nullable', 'string', 'max:255'],
             'npwp_pelapor'      => ['nullable', 'string', 'max:25'],
+            'nib_pelapor'       => ['nullable', 'string', 'max:20'],
 
             // ── Terlapor ──────────────────────────────────────────
             'nama_terlapor'     => ['required', 'string', 'max:255'],
-            'jenis_terlapor'    => ['required', 'in:perorangan,badan_hukum,objek_lainnya'],
+            'jenis_terlapor'    => ['required', 'in:perorangan,lembaga,badan_hukum,objek_lainnya'],
             'jenis_usaha'       => ['nullable', 'string', 'max:255'],
             'no_telp_terlapor'  => ['nullable', 'string', 'max:20'],
             'alamat_terlapor'   => ['nullable', 'string'],
-            'nama_perusahaan'   => ['nullable', 'string', 'max:255'],
             'nib_terlapor'      => ['nullable', 'string', 'max:20'],
+            'npwp_terlapor'     => ['nullable', 'string', 'max:25'],
         ];
     }
 
@@ -57,6 +58,7 @@ class StorePengaduanRequest extends FormRequest
         return [
             'nama_pelapor.required'      => 'Nama pelapor wajib diisi.',
             'nama_terlapor.required'     => 'Nama / perusahaan terlapor wajib diisi.',
+            'nama_lembaga.required_if'   => 'Nama Lembaga/Organisasi atau Nama Perusahaan wajib diisi untuk jenis Pelapor ini.',
             'jenis_terlapor.required'    => 'Jenis terlapor wajib dipilih.',
             'tanggal_pengaduan.required' => 'Tanggal pengaduan wajib diisi.',
             'sumber_laporan.required'    => 'Sumber laporan wajib dipilih.',

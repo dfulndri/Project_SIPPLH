@@ -9,7 +9,7 @@ class Pelapor extends Model
     protected $fillable = [
         'nama_pelapor', 'jenis_pelapor', 'nik', 'alamat', 'no_telp', 'email',
         'kecamatan_id', 'kelurahan_id', 'anonim',
-        'nama_lembaga', 'jabatan_di_lembaga', 'npwp',
+        'nama_lembaga', 'jabatan_di_lembaga', 'npwp', 'nib',
     ];
     protected $casts = ['anonim' => 'boolean'];
 
