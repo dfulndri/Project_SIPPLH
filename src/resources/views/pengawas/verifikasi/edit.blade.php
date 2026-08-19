@@ -187,32 +187,46 @@
                 </div>
             </div>
             <div class="cp-body">
+                @php
+                    $jenisTerlapor = $pengaduan->terlapor?->jenis_terlapor ?? 'perorangan';
+                    $pjLabel = [
+                        'perorangan'    => ['nama_pj' => 'Nama PJ', 'nama_perusahaan' => null, 'bidang' => 'Bidang Usaha', 'deskripsi' => 'Deskripsi Kegiatan'],
+                        'lembaga'       => ['nama_pj' => 'Nama PJ', 'nama_perusahaan' => 'Nama Lembaga', 'bidang' => 'Jenis/Kategori Lembaga', 'deskripsi' => 'Deskripsi Kegiatan'],
+                        'badan_hukum'   => ['nama_pj' => 'Nama PJ', 'nama_perusahaan' => 'Nama Perusahaan', 'bidang' => 'Bidang Usaha', 'deskripsi' => 'Deskripsi Kegiatan'],
+                        'objek_lainnya' => ['nama_pj' => 'Pemilik/Pengelola', 'nama_perusahaan' => null, 'bidang' => 'Jenis Objek', 'deskripsi' => 'Deskripsi Objek'],
+                    ][$jenisTerlapor];
+                @endphp
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Nama PJ</label>
+                        <label class="form-label">{{ $pjLabel['nama_pj'] }}</label>
                         <input type="text" name="pj_nama_pj" class="form-control"
                             value="{{ old('pj_nama_pj', $pj?->nama_pj) }}" placeholder="Nama penanggung jawab">
                     </div>
+                    @if(in_array($jenisTerlapor, ['lembaga', 'badan_hukum']))
                     <div class="col-md-6">
                         <label class="form-label">Jabatan PJ</label>
                         <input type="text" name="pj_jabatan_pj" class="form-control"
                             value="{{ old('pj_jabatan_pj', $pj?->jabatan_pj) }}" placeholder="Direktur / Manajer">
                     </div>
+                    @endif
+                    @if($pjLabel['nama_perusahaan'])
                     <div class="col-md-6">
-                        <label class="form-label">Nama Perusahaan</label>
+                        <label class="form-label">{{ $pjLabel['nama_perusahaan'] }}</label>
                         <input type="text" name="pj_nama_perusahaan" class="form-control"
                             value="{{ old('pj_nama_perusahaan', $pj?->nama_perusahaan ?? $pengaduan->terlapor?->nama) }}">
                     </div>
+                    @endif
                     <div class="col-md-6">
-                        <label class="form-label">Bidang Usaha</label>
+                        <label class="form-label">{{ $pjLabel['bidang'] }}</label>
                         <input type="text" name="pj_bidang_usaha" class="form-control"
                             value="{{ old('pj_bidang_usaha', $pj?->bidang_usaha ?? $pengaduan->terlapor?->jenis_usaha) }}">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Deskripsi Kegiatan</label>
+                        <label class="form-label">{{ $pjLabel['deskripsi'] }}</label>
                         <input type="text" name="pj_deskripsi_kegiatan" class="form-control"
                             value="{{ old('pj_deskripsi_kegiatan', $pj?->deskripsi_kegiatan) }}">
                     </div>
+                    @if($jenisTerlapor === 'badan_hukum')
                     <div class="col-md-6">
                         <label class="form-label">Status Permodalan</label>
                         <input type="text" name="pj_status_permodalan" class="form-control"
@@ -232,6 +246,8 @@
                         <input type="text" name="pj_nib" class="form-control"
                             value="{{ old('pj_nib', $pj?->nib) }}">
                     </div>
+                    @endif
+                    @if($jenisTerlapor !== 'objek_lainnya')
                     <div class="col-md-3"><label class="form-label">Telepon</label>
                         <input type="text" name="pj_no_telp" class="form-control"
                             value="{{ old('pj_no_telp', $pj?->no_telp) }}">
@@ -240,6 +256,7 @@
                         <input type="email" name="pj_email" class="form-control"
                             value="{{ old('pj_email', $pj?->email) }}">
                     </div>
+                    @endif
                     <div class="col-md-6"><label class="form-label">Koordinat Lat (Kegiatan)</label>
                         <input type="text" name="pj_koordinat_lat" class="form-control"
                             value="{{ old('pj_koordinat_lat', $pj?->koordinat_lat) }}">

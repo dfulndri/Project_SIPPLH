@@ -206,66 +206,103 @@
                 </div>
             </div>
             <div class="cp-body">
+                @php
+                    $jenisTerlapor = $pengaduan?->terlapor?->jenis_terlapor ?? 'perorangan';
+                    $pjLabel = [
+                        'perorangan' => [
+                            'nama_pj' => 'Nama Penanggung Jawab',
+                            'nama_perusahaan' => null,
+                            'bidang' => 'Bidang Usaha / Kegiatan',
+                            'deskripsi' => 'Deskripsi Kegiatan',
+                        ],
+                        'lembaga' => [
+                            'nama_pj' => 'Nama Penanggung Jawab',
+                            'nama_perusahaan' => 'Nama Lembaga',
+                            'bidang' => 'Jenis/Kategori Lembaga',
+                            'deskripsi' => 'Deskripsi Kegiatan',
+                        ],
+                        'badan_hukum' => [
+                            'nama_pj' => 'Nama Penanggung Jawab',
+                            'nama_perusahaan' => 'Nama Perusahaan / Kegiatan',
+                            'bidang' => 'Bidang Usaha / Kegiatan',
+                            'deskripsi' => 'Deskripsi Kegiatan',
+                        ],
+                        'objek_lainnya' => [
+                            'nama_pj' => 'Pemilik/Pengelola',
+                            'nama_perusahaan' => null,
+                            'bidang' => 'Jenis Objek',
+                            'deskripsi' => 'Deskripsi Objek',
+                        ],
+                    ][$jenisTerlapor];
+                @endphp
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Nama Penanggung Jawab</label>
+                        <label class="form-label">{{ $pjLabel['nama_pj'] }}</label>
                         <input type="text" name="pj_nama_pj" class="form-control" value="{{ old('pj_nama_pj') }}"
                             placeholder="Nama lengkap PJ">
                     </div>
+                    @if (in_array($jenisTerlapor, ['lembaga', 'badan_hukum']))
+                        <div class="col-md-6">
+                            <label class="form-label">Jabatan</label>
+                            <input type="text" name="pj_jabatan_pj" class="form-control"
+                                value="{{ old('pj_jabatan_pj') }}" placeholder="Direktur / Manajer / dll">
+                        </div>
+                    @endif
+                    @if ($pjLabel['nama_perusahaan'])
+                        <div class="col-md-6">
+                            <label class="form-label">{{ $pjLabel['nama_perusahaan'] }}</label>
+                            <input type="text" name="pj_nama_perusahaan" class="form-control"
+                                value="{{ old('pj_nama_perusahaan', $pengaduan?->terlapor?->nama) }}"
+                                placeholder="Nama lengkap perusahaan">
+                        </div>
+                    @endif
                     <div class="col-md-6">
-                        <label class="form-label">Jabatan</label>
-                        <input type="text" name="pj_jabatan_pj" class="form-control"
-                            value="{{ old('pj_jabatan_pj') }}" placeholder="Direktur / Manajer / dll">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Nama Perusahaan / Kegiatan</label>
-                        <input type="text" name="pj_nama_perusahaan" class="form-control"
-                            value="{{ old('pj_nama_perusahaan', $pengaduan?->terlapor?->nama) }}"
-                            placeholder="Nama lengkap perusahaan">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Bidang Usaha / Kegiatan</label>
+                        <label class="form-label">{{ $pjLabel['bidang'] }}</label>
                         <input type="text" name="pj_bidang_usaha" class="form-control"
                             value="{{ old('pj_bidang_usaha', $pengaduan?->terlapor?->jenis_usaha) }}"
                             placeholder="Jenis bidang usaha">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Deskripsi Kegiatan</label>
+                        <label class="form-label">{{ $pjLabel['deskripsi'] }}</label>
                         <input type="text" name="pj_deskripsi_kegiatan" class="form-control"
                             value="{{ old('pj_deskripsi_kegiatan') }}" placeholder="Deskripsi kegiatan usaha">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Status Permodalan</label>
-                        <input type="text" name="pj_status_permodalan" class="form-control"
-                            value="{{ old('pj_status_permodalan') }}" placeholder="PMDN / PMA">
-                    </div>
-                    <div class="col-md-3 position-relative">
-                        <label class="form-label">KBLI</label>
-
-                        <input type="text" id="kbliSearch" class="form-control" autocomplete="off"
-                            placeholder="Ketik kode atau kata kunci, mis: kertas">
-
-                        <input type="hidden" id="kbliInput" name="pj_kbli_id" value="{{ old('pj_kbli_id') }}">
-
-                        <div id="kbliResults" class="list-group position-absolute w-100"
-                            style="z-index:1000; max-height:240px; overflow-y:auto; display:none; font-size:.82rem;">
+                    @if ($jenisTerlapor === 'badan_hukum')
+                        <div class="col-md-6">
+                            <label class="form-label">Status Permodalan</label>
+                            <input type="text" name="pj_status_permodalan" class="form-control"
+                                value="{{ old('pj_status_permodalan') }}" placeholder="PMDN / PMA">
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">NIB</label>
-                        <input type="text" name="pj_nib" class="form-control" value="{{ old('pj_nib') }}"
-                            placeholder="Nomor Induk Berusaha">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">No. Telepon</label>
-                        <input type="text" name="pj_no_telp" class="form-control" value="{{ old('pj_no_telp') }}"
-                            placeholder="08xxxxxxxxxx">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="pj_email" class="form-control" value="{{ old('pj_email') }}"
-                            placeholder="email@perusahaan.com">
-                    </div>
+                        <div class="col-md-3 position-relative">
+                            <label class="form-label">KBLI</label>
+
+                            <input type="text" id="kbliSearch" class="form-control" autocomplete="off"
+                                placeholder="Ketik kode atau kata kunci, mis: kertas">
+
+                            <input type="hidden" id="kbliInput" name="pj_kbli_id" value="{{ old('pj_kbli_id') }}">
+
+                            <div id="kbliResults" class="list-group position-absolute w-100"
+                                style="z-index:1000; max-height:240px; overflow-y:auto; display:none; font-size:.82rem;">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">NIB</label>
+                            <input type="text" name="pj_nib" class="form-control" value="{{ old('pj_nib') }}"
+                                placeholder="Nomor Induk Berusaha">
+                        </div>
+                    @endif
+                    @if ($jenisTerlapor !== 'objek_lainnya')
+                        <div class="col-md-3">
+                            <label class="form-label">No. Telepon</label>
+                            <input type="text" name="pj_no_telp" class="form-control"
+                                value="{{ old('pj_no_telp') }}" placeholder="08xxxxxxxxxx">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="pj_email" class="form-control" value="{{ old('pj_email') }}"
+                                placeholder="email@perusahaan.com">
+                        </div>
+                    @endif
                     <div class="col-md-6">
                         <label class="form-label">Koordinat Latitude</label>
                         <input type="number" step="any" name="pj_koordinat_lat" class="form-control"

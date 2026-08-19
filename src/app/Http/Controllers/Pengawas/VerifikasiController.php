@@ -149,6 +149,11 @@ class VerifikasiController extends Controller
     public function edit(VerifikasiLapangan $verifikasi)
     {
         abort_if($verifikasi->created_by !== Auth::id(), 403);
+        abort_if(
+            $verifikasi->pengaduan->status === Pengaduan::STATUS_ARSIP,
+            403,
+            'Pengaduan ini sudah diarsipkan oleh Admin dan tidak bisa diedit lagi.'
+        );
         $verifikasi->load(['timVerifikator', 'penanggungJawab', 'dokumentasiFoto', 'saksi', 'pengaduan.terlapor']);
         $pegawai = User::where('is_active', true)->whereIn('role', ['admin', 'pengawas'])->orderBy('name')->get();
         return view('pengawas.verifikasi.edit', compact('verifikasi', 'pegawai'));
@@ -157,6 +162,11 @@ class VerifikasiController extends Controller
     public function update(Request $request, VerifikasiLapangan $verifikasi)
     {
         abort_if($verifikasi->created_by !== Auth::id(), 403);
+        abort_if(
+            $verifikasi->pengaduan->status === Pengaduan::STATUS_ARSIP,
+            403,
+            'Pengaduan ini sudah diarsipkan oleh Admin dan tidak bisa diedit lagi.'
+        );
 
         DB::transaction(function () use ($request, $verifikasi) {
             $verifikasi->update([
@@ -240,6 +250,11 @@ class VerifikasiController extends Controller
     public function finalize(Request $request, VerifikasiLapangan $verifikasi)
     {
         abort_if($verifikasi->created_by !== Auth::id(), 403);
+        abort_if(
+            $verifikasi->pengaduan->status === Pengaduan::STATUS_ARSIP,
+            403,
+            'Pengaduan ini sudah diarsipkan oleh Admin dan tidak bisa diedit lagi.'
+        );
 
         if ($verifikasi->timVerifikator->isEmpty()) {
             return back()->with('error', 'Tambahkan Tim Verifikator terlebih dahulu.');
@@ -267,6 +282,11 @@ class VerifikasiController extends Controller
     public function deleteFoto(VerifikasiLapangan $verifikasi, DokumentasiFoto $foto)
     {
         abort_if($verifikasi->created_by !== Auth::id(), 403);
+        abort_if(
+            $verifikasi->pengaduan->status === Pengaduan::STATUS_ARSIP,
+            403,
+            'Pengaduan ini sudah diarsipkan oleh Admin dan tidak bisa diedit lagi.'
+        );
         Storage::disk('public')->delete($foto->path_file);
         $foto->delete();
         return back()->with('success', 'Foto berhasil dihapus.');

@@ -15,7 +15,8 @@
     <div class="page-hd d-flex align-items-start justify-content-between flex-wrap gap-3">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-{{ $ba->status === 'final' ? 'success' : 'warning' }} px-3 py-2" style="font-size:.82rem">
+                <span class="badge bg-{{ $ba->status === 'final' ? 'success' : 'warning' }} px-3 py-2"
+                    style="font-size:.82rem">
                     {{ ucfirst($ba->status) }}
                 </span>
                 <code style="font-size:.95rem;color:var(--maroon)">{{ $ba->nomor_ba }}</code>
@@ -99,7 +100,7 @@
             @php $pj = $ba->verifikasi?->penanggungJawab; @endphp
             @if ($pj)
                 <div class="row g-2 mb-4" style="font-size:.82rem">
-                    @foreach ([['Nama Penanggung Jawab', $pj->nama_pj], ['Jabatan', $pj->jabatan_pj ?: '—'], ['Nama Perusahaan', $pj->nama_perusahaan], ['Bidang Usaha / Kegiatan', $pj->bidang_usaha ?: '—'], ['Kode KBLI', $pj->kbli ?: '—'], ['NIB', $pj->nib ?: '—'], ['No. Telepon', $pj->no_telp ?: '—'], ['Email', $pj->email ?: '—']] as [$lbl, $val])
+                    @foreach ([['Nama Penanggung Jawab', $pj->nama_pj], ['Jabatan', $pj->jabatan_pj ?: '—'], ['Nama Perusahaan', $pj->nama_perusahaan], ['Bidang Usaha / Kegiatan', $pj->bidang_usaha ?: '—'], ['Kode KBLI', $pj->kbli_display ?: '—'], ['NIB', $pj->nib ?: '—'], ['No. Telepon', $pj->no_telp ?: '—'], ['Email', $pj->email ?: '—']] as [$lbl, $val])
                         <div class="col-6 col-md-3">
                             <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">
                                 {{ $lbl }}</div>

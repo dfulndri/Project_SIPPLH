@@ -283,21 +283,28 @@
                     <div class="cp-head">
                         <div class="cp-title"><i class="bi bi-clipboard-check me-1"></i>Verifikasi Lapangan</div>
                         <div class="d-flex gap-1">
-                            @if ($v->status == 'draft')
+                            @php $isArsip = $pengaduan->status === \App\Models\Pengaduan::STATUS_ARSIP; @endphp
+                            @if (!$isArsip)
                                 <a href="{{ route('pengawas.verifikasi.edit', $v) }}"
                                     class="btn btn-xs btn-outline-maroon"><i class="bi bi-pencil"></i> Edit</a>
-                                <form method="POST" action="{{ route('pengawas.verifikasi.finalize', $v) }}"
-                                    class="d-inline"
-                                    onsubmit="return confirm('Selesaikan verifikasi ini? Berita Acara akan dibuat otomatis.')">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="btn btn-xs btn-success"><i class="bi bi-check2-all"></i>
-                                        Selesaikan &amp; Buat BA</button>
-                                </form>
-                            @elseif($v->beritaAcara)
+                                @if ($v->status == 'draft')
+                                    <form method="POST" action="{{ route('pengawas.verifikasi.finalize', $v) }}"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Selesaikan verifikasi ini? Berita Acara akan dibuat otomatis.')">
+                                        @csrf @method('PATCH')
+                                        <button type="submit" class="btn btn-xs btn-success"><i class="bi bi-check2-all"></i>
+                                            Selesaikan &amp; Buat BA</button>
+                                    </form>
+                                @endif
+                            @endif
+                            @if($v->beritaAcara)
                                 <a href="{{ route('pengawas.berita-acara.show', $v->beritaAcara) }}"
                                     class="btn btn-xs btn-outline-maroon"><i class="bi bi-file-text"></i> Lihat BA</a>
                                 <a href="{{ route('pengawas.berita-acara.pdf', $v->beritaAcara) }}"
                                     class="btn btn-xs btn-success"><i class="bi bi-download"></i> PDF</a>
+                            @endif
+                            @if($isArsip)
+                                <span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Diarsipkan — Terkunci</span>
                             @endif
                         </div>
                     </div>
@@ -386,7 +393,7 @@
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <div class="info-label">KBLI</div>
-                                    <div class="info-value">{{ $pj->kbli ?: '—' }}</div>
+                                    <div class="info-value">{{ $pj->kbli_display ?: '—' }}</div>
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <div class="info-label">NIB</div>
