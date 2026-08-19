@@ -488,7 +488,7 @@
     {{-- ══════ KLAUSUL PENUTUP ══════ --}}
     <p class="tj mt15">
         Pelaksanaan dan temuan fakta-fakta verifikasi pengaduan lingkungan hidup ini diketahui
-        dan dibenarkan oleh pihak <span class="b">{{ $namaTerlapor }}</span> dan akan ditindaklanjuti
+        dan dibenarkan oleh pihak <span class="b">Terlapor</span> dan akan ditindaklanjuti
         selambat-lambatnya 14 (empat belas) hari setelah Berita Acara ini ditandatangani.
     </p>
 

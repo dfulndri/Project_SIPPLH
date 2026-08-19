@@ -344,7 +344,7 @@
         };
         const TERLAPOR_LABELS = {
             perorangan: {
-                identitas: 'Nama Terlapor',
+                identitas: 'Nama Usaha/Kegiatan',
                 alamat: 'Alamat Terlapor',
                 jenisUsaha: 'Jenis Usaha/Kegiatan',
                 pic: ''

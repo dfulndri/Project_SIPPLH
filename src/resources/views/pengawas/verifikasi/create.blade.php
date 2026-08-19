@@ -79,13 +79,13 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Koordinat Latitude</label>
-                        <input type="text" name="koordinat_lat" class="form-control" value="{{ old('koordinat_lat') }}"
-                            placeholder="-6.154588">
+                        <input type="text" name="koordinat_lat" class="form-control"
+                            value="{{ old('koordinat_lat', $pengaduan->koordinat_lat) }}" placeholder="-6.154588">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Koordinat Longitude</label>
-                        <input type="text" name="koordinat_lng" class="form-control" value="{{ old('koordinat_lng') }}"
-                            placeholder="106.574295">
+                        <input type="text" name="koordinat_lng" class="form-control"
+                            value="{{ old('koordinat_lng', $pengaduan->koordinat_lng) }}" placeholder="106.574295">
                     </div>
                 </div>
             </div>
