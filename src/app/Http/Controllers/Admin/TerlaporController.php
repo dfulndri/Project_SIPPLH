@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -18,7 +19,7 @@ class TerlaporController extends Controller
             $s = $request->search;
             $query->where(function ($q) use ($s) {
                 $q->where('nama', 'like', "%{$s}%")
-                  ->orWhere('nama_perusahaan', 'like', "%{$s}%");
+                    ->orWhere('nama_perusahaan', 'like', "%{$s}%");
             });
         }
 
@@ -30,12 +31,21 @@ class TerlaporController extends Controller
     {
         $request->validate([
             'nama'           => ['required', 'string', 'max:255'],
-            'jenis_terlapor' => ['required', 'in:perorangan,badan_hukum,objek_lainnya'],
+            'jenis_terlapor' => ['required', 'in:perorangan,lembaga,badan_hukum,objek_lainnya'],
         ]);
 
         Terlapor::create($request->only([
-            'nama', 'jenis_terlapor', 'alamat', 'no_telp', 'jenis_usaha',
-            'nama_perusahaan', 'npwp', 'nib', 'bidang_usaha', 'penanggung_jawab', 'jabatan_pj',
+            'nama',
+            'jenis_terlapor',
+            'alamat',
+            'no_telp',
+            'jenis_usaha',
+            'nama_perusahaan',
+            'npwp',
+            'nib',
+            'bidang_usaha',
+            'penanggung_jawab',
+            'jabatan_pj',
         ]));
 
         return back()->with('success', 'Data terlapor berhasil ditambahkan.');
@@ -43,11 +53,23 @@ class TerlaporController extends Controller
 
     public function update(Request $request, Terlapor $terlapor)
     {
-        $request->validate(['nama' => ['required', 'string', 'max:255']]);
+        $request->validate([
+            'nama'           => ['required', 'string', 'max:255'],
+            'jenis_terlapor' => ['nullable', 'in:perorangan,lembaga,badan_hukum,objek_lainnya'],
+        ]);
 
         $terlapor->update($request->only([
-            'nama', 'jenis_terlapor', 'alamat', 'no_telp', 'jenis_usaha',
-            'nama_perusahaan', 'npwp', 'nib', 'bidang_usaha', 'penanggung_jawab', 'jabatan_pj',
+            'nama',
+            'jenis_terlapor',
+            'alamat',
+            'no_telp',
+            'jenis_usaha',
+            'nama_perusahaan',
+            'npwp',
+            'nib',
+            'bidang_usaha',
+            'penanggung_jawab',
+            'jabatan_pj',
         ]));
 
         return back()->with('success', 'Data terlapor berhasil diperbarui.');
