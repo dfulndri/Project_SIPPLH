@@ -245,40 +245,75 @@ Data MySQL disimpan pada volume Docker `sipplh_dbdata` sehingga tidak hilang saa
 Project_SIPPLH/
 ├── docker/
 │   ├── nginx/
-│   │   └── default.conf          # Konfigurasi Nginx
+│   │   └── default.conf              # Konfigurasi Nginx
 │   └── php/
-│       ├── Dockerfile            # Image PHP-FPM aplikasi
-│       └── php.ini               # Konfigurasi PHP kustom
+│       ├── Dockerfile                # Image PHP-FPM aplikasi
+│       └── php.ini                   # Konfigurasi PHP kustom
 ├── docs/
-│   └── screenshots/              # Screenshot untuk README
-├── src/                          # Source code aplikasi Laravel
+│   └── screenshots/                  # Screenshot untuk README
+├── src/                              # Source code aplikasi Laravel
 │   ├── app/
+│   │   ├── Exports/                  # Kelas ekspor laporan (Excel)
+│   │   ├── Helpers/                  # Fungsi bantu (helper) aplikasi
 │   │   ├── Http/
 │   │   │   ├── Controllers/
-│   │   │   │   ├── Auth/         # AuthController
-│   │   │   │   ├── Admin/        # Controller modul Administrator
-│   │   │   │   └── Pengawas/     # Controller modul Pengawas
-│   │   │   └── Middleware/       # AdminMiddleware, PengawasMiddleware
-│   │   └── Models/               # Model Eloquent
+│   │   │   │   ├── Admin/            # Controller modul Administrator
+│   │   │   │   ├── Auth/             # Controller autentikasi (login/logout)
+│   │   │   │   ├── Pengawas/         # Controller modul Pengawas
+│   │   │   │   └── Controller.php    # Base controller
+│   │   │   ├── Middleware/           # AdminMiddleware, PengawasMiddleware
+│   │   │   └── Requests/             # Form Request (validasi input)
+│   │   ├── Models/                   # Model Eloquent
+│   │   ├── Providers/                # Service provider
+│   │   ├── Repositories/             # Lapisan akses data (query database)
+│   │   ├── Services/                 # Lapisan logika bisnis
+│   │   └── Support/                  # Kelas pendukung
+│   ├── bootstrap/                    # Bootstrap framework Laravel
+│   ├── config/                       # File konfigurasi aplikasi
 │   ├── database/
-│   │   ├── migrations/           # Skema database
-│   │   └── seeders/              # UserSeeder, DatabaseSeeder
-│   ├── public/
-│   │   └── css/sipplh.css        # Stylesheet kustom
-│   ├── resources/views/
-│   │   ├── auth/                 # Halaman login
-│   │   ├── layouts/              # Layout utama + sidebar + topbar
-│   │   ├── admin/                # View modul Administrator
-│   │   └── public/               # Halaman publik (verifikasi QR)
+│   │   ├── migrations/               # Skema database
+│   │   └── seeders/                  # UserSeeder, DatabaseSeeder
+│   ├── public/                       # Entry point web dan aset publik
+│   ├── resources/
+│   │   ├── css/                      # Sumber CSS
+│   │   ├── js/                       # Sumber JavaScript
+│   │   └── views/
+│   │       ├── admin/                # Tampilan modul Administrator
+│   │       ├── auth/                 # Halaman login
+│   │       ├── components/           # Komponen Blade yang dapat dipakai ulang
+│   │       ├── layouts/              # Layout utama (sidebar, topbar)
+│   │       ├── partials/             # Potongan tampilan (partial)
+│   │       ├── pdf/                  # Template dokumen PDF (Berita Acara, laporan)
+│   │       ├── pengawas/             # Tampilan modul Pengawas
+│   │       ├── public/               # Halaman publik (verifikasi QR Code)
+│   │       └── welcome.blade.php
 │   └── routes/
-│       ├── web.php               # Route utama, auth, dan verifikasi QR
-│       ├── admin.php             # Route khusus Administrator
-│       └── pengawas.php          # Route khusus Pengawas
-├── docker-compose.yml            # Orkestrasi container
-├── setup_sipplh.sh               # Script fondasi backend (migration, model, route, seeder)
-├── setup_ui.sh                   # Script UI (login, layout, dashboard)
+│       ├── admin.php                 # Route khusus Administrator
+│       ├── console.php               # Perintah Artisan / console
+│       ├── pengawas.php              # Route khusus Pengawas
+│       └── web.php                   # Route utama, autentikasi, dan verifikasi QR
+├── docker-compose.yml                # Orkestrasi container
+├── setup_sipplh.sh                   # Script fondasi backend (migration, model, route, seeder)
+├── setup_ui.sh                       # Script UI (login, layout, dashboard)
 └── README.md
 ```
+> 📝 Struktur di atas hanya menampilkan folder utama. Folder bawaan Laravel lainnya (seperti `storage`, `tests`, dan `vendor`) tidak dicantumkan.
+
+### Pola Arsitektur
+
+Aplikasi memisahkan tanggung jawab ke dalam beberapa lapisan agar kode mudah dirawat dan dikembangkan:
+
+| Lapisan | Lokasi | Peran |
+|---------|--------|-------|
+| **Route** | `routes/` | Memetakan URL ke controller, dipisah per role (`admin.php`, `pengawas.php`) |
+| **Middleware** | `app/Http/Middleware` | Membatasi akses berdasarkan role pengguna |
+| **Request** | `app/Http/Requests` | Validasi input form sebelum masuk ke controller |
+| **Controller** | `app/Http/Controllers` | Menerima request dan mengembalikan tampilan/respons, dikelompokkan per modul (`Admin`, `Auth`, `Pengawas`) |
+| **Service** | `app/Services` | Logika bisnis (misalnya alur verifikasi dan pembuatan Berita Acara) |
+| **Repository** | `app/Repositories` | Akses dan query data ke database |
+| **Model** | `app/Models` | Representasi tabel dan relasi Eloquent |
+| **Export** | `app/Exports` | Pembuatan file laporan yang diekspor |
+| **View** | `resources/views` | Tampilan Blade per role, plus template `pdf` untuk dokumen cetak |
 
 ---
 
