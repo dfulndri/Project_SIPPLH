@@ -35,7 +35,6 @@ Platform web untuk mengelola pengaduan lingkungan hidup, melakukan verifikasi la
 - [Struktur Database](#-struktur-database)
 - [Daftar Route](#-daftar-route)
 - [Instalasi dan Menjalankan Project](#-instalasi-dan-menjalankan-project)
-- [Akun Demo](#-akun-demo)
 - [Penomoran Otomatis](#-penomoran-otomatis)
 - [Verifikasi Berita Acara via QR Code](#-verifikasi-berita-acara-via-qr-code)
 - [Status Pengembangan](#-status-pengembangan)
@@ -491,19 +490,6 @@ Repositori ini menyertakan dua script otomasi yang dijalankan dari root project:
 | `bash setup_ui.sh` | Membuat halaman login, layout admin (sidebar dan topbar), dashboard, dan stylesheet |
 
 > ⚠️ Kedua script menimpa file yang sudah ada. Gunakan hanya saat menyiapkan project dari awal, dan **jangan dijalankan pada project yang sudah Anda modifikasi**.
-
----
-
-## 🔑 Akun Demo
-
-Setelah menjalankan `php artisan migrate --seed`, tersedia dua akun contoh:
-
-| Role | Email | Password |
-|------|-------|----------|
-| Administrator | `admin@sipplh.go.id` | `Admin@1234` |
-| Pengawas | `pengawas@sipplh.go.id` | `Pengawas@1234` |
-
-> 🔒 **Wajib ganti password** dan hapus akun demo sebelum sistem digunakan di lingkungan produksi.
 
 ---
 
